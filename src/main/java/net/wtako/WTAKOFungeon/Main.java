@@ -17,7 +17,7 @@ public final class Main extends JavaPlugin {
     private static Main             instance;
     public static YamlConfiguration LANG;
     public static File              LANG_FILE;
-    public static Logger            log = Logger.getLogger("WTAKOFun");
+    public static Logger            log = Logger.getLogger("WTAKOFungeon");
 
     @Override
     public void onEnable() {
