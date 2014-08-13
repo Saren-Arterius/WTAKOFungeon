@@ -3,12 +3,14 @@ package net.wtako.WTAKOFungeon.Utils;
 import net.wtako.WTAKOFungeon.Main;
 import net.wtako.WTAKOFungeon.Commands.WFun.ArgHelp;
 import net.wtako.WTAKOFungeon.Commands.WFun.ArgReload;
+import net.wtako.WTAKOFungeon.Commands.WFun.ArgTest;
 
 public enum Commands {
 
     MAIN_COMMAND(Lang.HELP_HELP.toString(), ArgHelp.class, Main.artifactId + ".use"),
     H(Lang.HELP_HELP.toString(), ArgHelp.class, Main.artifactId + ".use"),
     HELP(Lang.HELP_HELP.toString(), ArgHelp.class, Main.artifactId + ".use"),
+    TEST("/wfun {0}: test command", ArgTest.class, Main.artifactId + ".use"),
     RELOAD(Lang.HELP_RELOAD.toString(), ArgReload.class, Main.artifactId + ".reload");
 
     private String   helpMessage;
