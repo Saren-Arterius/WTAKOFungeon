@@ -3,11 +3,14 @@ package net.wtako.WTAKOFungeon.Methods;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import net.wtako.WTAKOFungeon.Main;
+import net.wtako.WTAKOFungeon.Utils.ItemStackUtils;
 import net.wtako.WTAKOFungeon.Utils.ItemUtils;
+import net.wtako.WTAKOFungeon.Utils.Lang;
 
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -18,6 +21,7 @@ public class Fungeon {
     private static HashMap<Integer, Fungeon> validFungeons = new HashMap<Integer, Fungeon>();
     private final ArrayList<Player>          players       = new ArrayList<Player>();
     private final boolean                    isPlaying     = false;
+    private Integer                          id;
     private String                           name;
     private Integer                          timeLimit;
     private Integer                          minPlayers;
@@ -42,6 +46,7 @@ public class Fungeon {
             selStmt.close();
             return;
         }
+        id = fungeonID;
         name = result.getString("funegon_name");
         timeLimit = result.getInt("time_limit");
         minPlayers = result.getInt("min_players");
@@ -93,8 +98,9 @@ public class Fungeon {
     }
 
     public void mainLoop() {
-        assert fungeonTimer > 0;
-        assert waitTimer > 0;
+        assert id != null;
+        assert fungeonTimer != null;
+        assert waitTimer != null;
     }
 
     public Error addPlayer(Player player) {
@@ -142,12 +148,16 @@ public class Fungeon {
         return Error.SUCCESS;
     }
 
-    public Error win() {
+    public Error win() throws SQLException {
         if (getStatus() != Status.PLAYING) {
             return Error.FUNGEON_HAS_NOT_STARTED;
         }
+        final ArrayList<ItemStack> itemPrizes = Fungeon.getItemPrizes(id);
+        final int getCashPrize = Fungeon.getCashPrize(id);
         for (final Player player: new ArrayList<Player>(players)) {
             playerLeave(player);
+            Fungeon.awardPlayer(player, itemPrizes);
+            Fungeon.awardPlayer(player, getCashPrize);
         }
         return Error.SUCCESS;
     }
@@ -213,11 +223,17 @@ public class Fungeon {
     }
 
     public static void awardPlayer(Player player, ArrayList<ItemStack> itemPrizes) {
-
+        for (final ItemStack itemStack: itemPrizes) {
+            ItemStackUtils.giveToPlayerOrDrop(itemStack, player, player.getLocation());
+        }
     }
 
     public static void awardPlayer(Player player, int cashPrize) {
-
+        if (Main.econ != null) {
+            Main.econ.depositPlayer(player, cashPrize);
+        } else {
+            player.sendMessage(MessageFormat.format(Lang.ERROR_HOOKING.toString(), "Vault"));
+        }
     }
 
     public static boolean isInRegion(Location p1, Location p2, Location check) {

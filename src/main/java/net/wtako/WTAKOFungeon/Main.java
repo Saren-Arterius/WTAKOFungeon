@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import net.milkbowl.vault.economy.Economy;
 import net.wtako.WTAKOFungeon.Commands.CommandWFun;
 import net.wtako.WTAKOFungeon.EventHandlers.TestListener;
 import net.wtako.WTAKOFungeon.Methods.Database;
@@ -14,11 +15,13 @@ import net.wtako.WTAKOFungeon.Utils.Config;
 import net.wtako.WTAKOFungeon.Utils.Lang;
 
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class Main extends JavaPlugin {
 
     private static Main             instance;
+    public static Economy           econ;
     public static String            artifactId;
     public static YamlConfiguration LANG;
     public static File              LANG_FILE;
@@ -38,6 +41,15 @@ public final class Main extends JavaPlugin {
             }
         }
         getServer().getPluginManager().registerEvents(new TestListener(), this);
+
+    }
+
+    public void setupEcon() {
+        final RegisteredServiceProvider<Economy> economyProvider = Main.getInstance().getServer().getServicesManager()
+                .getRegistration(net.milkbowl.vault.economy.Economy.class);
+        if (economyProvider != null) {
+            Main.econ = economyProvider.getProvider();
+        }
     }
 
     public void loadLang() {

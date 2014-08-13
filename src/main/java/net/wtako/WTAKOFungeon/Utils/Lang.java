@@ -20,7 +20,9 @@ public enum Lang {
             + " &a{0}&f to reload the plugin. {1}"),
     NO_PERMISSION_HELP("no-permission-help", "(&cno permission&f)"),
     PLUGIN_RELOADED("plugin-reloaded", "&aPlugin reloaded."),
-    NO_PERMISSION_COMMAND("no-permission-command", "&cYou are not allowed to use this command.");
+    NO_PERMISSION_COMMAND("no-permission-command", "&cYou are not allowed to use this command."),
+    ERROR_HOOKING("error-hooking", "&4Error in hooking into {0}! Please contact server administrators."),
+    DB_EXCEPTION("db-exception", "&4A database error occured! Please contact server administrators.");
 
     private String                   path;
     private String                   def;
