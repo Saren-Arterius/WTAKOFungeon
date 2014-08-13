@@ -1,8 +1,8 @@
 package net.wtako.WTAKOFungeon.Utils;
 
-import net.wtako.WTAKOFungeon.Commands.WFly.ArgHelp;
-import net.wtako.WTAKOFungeon.Commands.WFly.ArgReload;
-import net.wtako.WTAKOFungeon.Commands.WFly.ArgTest;
+import net.wtako.WTAKOFungeon.Commands.WFun.ArgHelp;
+import net.wtako.WTAKOFungeon.Commands.WFun.ArgReload;
+import net.wtako.WTAKOFungeon.Commands.WFun.ArgTest;
 
 public enum Commands {
 

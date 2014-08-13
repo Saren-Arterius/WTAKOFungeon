@@ -1,4 +1,4 @@
-package net.wtako.WTAKOFungeon.Commands.WFly;
+package net.wtako.WTAKOFungeon.Commands.WFun;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;

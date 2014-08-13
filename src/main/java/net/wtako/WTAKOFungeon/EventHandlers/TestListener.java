@@ -2,7 +2,7 @@ package net.wtako.WTAKOFungeon.EventHandlers;
 
 import java.util.ArrayList;
 
-import net.wtako.WTAKOFungeon.Commands.WFly.ArgTest;
+import net.wtako.WTAKOFungeon.Commands.WFun.ArgTest;
 import net.wtako.WTAKOFungeon.Methods.Funegon;
 
 import org.bukkit.Location;
