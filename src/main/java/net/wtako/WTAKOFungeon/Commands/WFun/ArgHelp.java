@@ -29,7 +29,6 @@ public class ArgHelp {
                     boolean hasHelpMessage = false;
                     for (final Entry<String, ArrayList<String>> entry: commandHelps.entrySet()) {
                         if (entry.getKey().equalsIgnoreCase(command.getHelpMessage())) {
-
                             entry.getValue().add(command.name().toLowerCase());
                             hasHelpMessage = true;
                             break;
@@ -51,7 +50,15 @@ public class ArgHelp {
                             displayCommands += Lang.COMMAND_HELP_SEPERATOR;
                         }
                     }
-                    messages.add(MessageFormat.format(entry.getKey(), displayCommands));
+                    String permissionString = "";
+                    for (final Commands command: Commands.values()) {
+                        if (command.getHelpMessage().equalsIgnoreCase(entry.getKey())
+                                && !sender.hasPermission(command.getRequiredPermission())) {
+                            permissionString = Lang.NO_PERMISSION_HELP.toString();
+                            break;
+                        }
+                    }
+                    messages.add(MessageFormat.format(entry.getKey(), displayCommands, permissionString));
                 }
                 sender.sendMessage(messages.toArray(new String[messages.size()]));
             }

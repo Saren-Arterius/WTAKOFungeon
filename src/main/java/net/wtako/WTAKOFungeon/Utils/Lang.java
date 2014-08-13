@@ -14,10 +14,11 @@ public enum Lang {
 
     TITLE("title", "[" + Main.getInstance().getName() + "]"),
     COMMAND_HELP_SEPERATOR("command-help-seperator", "&6 | &a"),
-    HELP_HELP("help-help", "Type &a/" + Main.getInstance().getProperty("mainCommand")
-            + " {0}&f to show help (this message)."),
-    HELP_RELOAD("help-reload", "Type &a/" + Main.getInstance().getProperty("mainCommand")
-            + " {0}&f to reload the plugin. &c(OP only)"),
+    HELP_HELP("help-help", "Type &b/" + Main.getInstance().getProperty("mainCommand")
+            + " &a{0}&f to show help (this message). {1}"),
+    HELP_RELOAD("help-reload", "Type &b/" + Main.getInstance().getProperty("mainCommand")
+            + " &a{0}&f to reload the plugin. {1}"),
+    NO_PERMISSION_HELP("no-permission-help", "(&cno permission&f)"),
     PLUGIN_RELOADED("plugin-reloaded", "&aPlugin reloaded."),
     NO_PERMISSION_COMMAND("no-permission-command", "&cYou are not allowed to use this command.");
 
