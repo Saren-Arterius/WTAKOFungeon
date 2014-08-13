@@ -3,10 +3,13 @@ package net.wtako.WTAKOFungeon;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import net.wtako.WTAKOFungeon.Commands.CommandWFun;
+import net.wtako.WTAKOFungeon.EventHandlers.TestListener;
+import net.wtako.WTAKOFungeon.Methods.Database;
 import net.wtako.WTAKOFungeon.Utils.Config;
 import net.wtako.WTAKOFungeon.Utils.Lang;
 
@@ -26,6 +29,14 @@ public final class Main extends JavaPlugin {
         getCommand(getProperty("mainCommand")).setExecutor(new CommandWFun());
         Config.saveAll();
         loadLang();
+        if (Database.getInstance() == null) {
+            try {
+                new Database();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        getServer().getPluginManager().registerEvents(new TestListener(), this);
     }
 
     public void loadLang() {

@@ -13,8 +13,11 @@ import org.bukkit.configuration.file.YamlConfiguration;
 public enum Lang {
 
     TITLE("title", "[" + Main.getInstance().getName() + "]"),
+    COMMAND_HELP_SEPERATOR("command-help-seperator", "&6 | &a"),
+    HELP_HELP("help-help", "Type &a/" + Main.getInstance().getProperty("mainCommand")
+            + " {0}&f to show help (this message)."),
     HELP_RELOAD("help-reload", "Type &a/" + Main.getInstance().getProperty("mainCommand")
-            + " reload&f to reload the plugin. &c(OP only)"),
+            + " {0}&f to reload the plugin. &c(OP only)"),
     PLUGIN_RELOADED("plugin-reloaded", "&aPlugin reloaded."),
     NO_PERMISSION_COMMAND("no-permission-command", "&cYou are not allowed to use this command.");
 
