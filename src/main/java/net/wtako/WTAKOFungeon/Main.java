@@ -7,6 +7,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import net.wtako.WTAKOFungeon.Commands.CommandWFun;
+import net.wtako.WTAKOFungeon.Utils.Config;
 import net.wtako.WTAKOFungeon.Utils.Lang;
 
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -22,9 +23,8 @@ public final class Main extends JavaPlugin {
     @Override
     public void onEnable() {
         Main.instance = this;
-        saveDefaultConfig();
-        getConfig().options().copyDefaults(true);
         getCommand(getProperty("mainCommand")).setExecutor(new CommandWFun());
+        Config.saveAll();
         loadLang();
     }
 
