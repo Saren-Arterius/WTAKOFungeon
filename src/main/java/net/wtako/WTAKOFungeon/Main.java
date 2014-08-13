@@ -19,6 +19,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 public final class Main extends JavaPlugin {
 
     private static Main             instance;
+    public static String            artifactId;
     public static YamlConfiguration LANG;
     public static File              LANG_FILE;
     public static Logger            log = Logger.getLogger("WTAKOFungeon");
@@ -26,9 +27,9 @@ public final class Main extends JavaPlugin {
     @Override
     public void onEnable() {
         Main.instance = this;
-        getCommand(getProperty("mainCommand")).setExecutor(new CommandWFun());
         Config.saveAll();
         loadLang();
+        getCommand(getProperty("mainCommand")).setExecutor(new CommandWFun());
         if (Database.getInstance() == null) {
             try {
                 new Database();

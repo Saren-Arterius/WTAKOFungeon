@@ -1,23 +1,24 @@
 package net.wtako.WTAKOFungeon.Utils;
 
+import net.wtako.WTAKOFungeon.Main;
 import net.wtako.WTAKOFungeon.Commands.WFun.ArgHelp;
 import net.wtako.WTAKOFungeon.Commands.WFun.ArgReload;
-import net.wtako.WTAKOFungeon.Commands.WFun.ArgTest;
 
 public enum Commands {
 
-    MAIN_COMMAND(Lang.HELP_HELP.toString(), ArgHelp.class),
-    H(Lang.HELP_HELP.toString(), ArgHelp.class),
-    HELP(Lang.HELP_HELP.toString(), ArgHelp.class),
-    RELOAD(Lang.HELP_RELOAD.toString(), ArgReload.class),
-    TEST("/wfun {0}: test command", ArgTest.class);
+    MAIN_COMMAND(Lang.HELP_HELP.toString(), ArgHelp.class, Main.artifactId + ".use"),
+    H(Lang.HELP_HELP.toString(), ArgHelp.class, Main.artifactId + ".use"),
+    HELP(Lang.HELP_HELP.toString(), ArgHelp.class, Main.artifactId + ".use"),
+    RELOAD(Lang.HELP_RELOAD.toString(), ArgReload.class, Main.artifactId + ".reload");
 
     private String   helpMessage;
     private Class<?> targetClass;
+    private String   permission;
 
-    private Commands(String helpMessage, Class<?> targetClass) {
+    private Commands(String helpMessage, Class<?> targetClass, String permission) {
         this.helpMessage = helpMessage;
         this.targetClass = targetClass;
+        this.permission = permission;
     }
 
     public String getHelpMessage() {
@@ -26,5 +27,9 @@ public enum Commands {
 
     public Class<?> getTargetClass() {
         return targetClass;
+    }
+
+    public String getRequiredPermission() {
+        return permission;
     }
 }
