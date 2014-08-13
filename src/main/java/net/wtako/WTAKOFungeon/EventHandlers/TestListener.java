@@ -3,7 +3,7 @@ package net.wtako.WTAKOFungeon.EventHandlers;
 import java.util.ArrayList;
 
 import net.wtako.WTAKOFungeon.Commands.WFun.ArgTest;
-import net.wtako.WTAKOFungeon.Methods.Funegon;
+import net.wtako.WTAKOFungeon.Methods.Fungeon;
 
 import org.bukkit.Location;
 import org.bukkit.event.EventHandler;
@@ -29,7 +29,7 @@ public class TestListener implements Listener {
                 break;
             case 3:
                 event.getPlayer().sendMessage(
-                        String.valueOf(Funegon.inRegion(locations.get(0), locations.get(1), locations.get(2))));
+                        String.valueOf(Fungeon.isInRegion(locations.get(0), locations.get(1), locations.get(2))));
                 ArgTest.testingLocationPlayers.remove(event.getPlayer()).clear();
                 break;
         }
