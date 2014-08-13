@@ -6,6 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.MessageFormat;
+
 import net.wtako.WTAKOFungeon.Main;
 import net.wtako.WTAKOFungeon.Utils.Lang;
 
@@ -34,10 +35,10 @@ public class Database {
     public void createTables() throws SQLException {
         final Statement cur = conn.createStatement();
         String stmt = "CREATE TABLE `funegons` (" + "`row_id` INTEGER PRIMARY KEY AUTOINCREMENT, "
-                + "`funegon_name` TEXT NOT NULL, " + "`time_limit` INT NOT NULL," + "`min_players` INT NOT NULL,"
-                + "`max_players` INT NOT NULL," + "`wait_time` INT NOT NULL," + "`lobby_loc_id` INT NULL,"
-                + "`area_p1_loc_id` INT NULL," + "`area_p2_loc_id` INT NULL," + "`wait_rm_loc_id` INT NULL,"
-                + "`start_pt_loc_id` INT NULL," + "`run_command` TEXT NULL" + ")";
+                + "`enabled` INT NOT NULL, `funegon_name` TEXT NOT NULL, " + "`time_limit` INT NOT NULL,"
+                + "`min_players` INT NOT NULL," + "`max_players` INT NOT NULL," + "`wait_time` INT NOT NULL,"
+                + "`lobby_loc_id` INT NULL," + "`area_p1_loc_id` INT NULL," + "`area_p2_loc_id` INT NULL,"
+                + "`wait_rm_loc_id` INT NULL," + "`start_pt_loc_id` INT NULL," + "`run_command` TEXT NULL" + ")";
         cur.execute(stmt);
         stmt = "CREATE TABLE `prizes` (" + "`row_id` INTEGER PRIMARY KEY AUTOINCREMENT, "
                 + "`funegon_id` INT NOT NULL," + "`cash_amount` INT NULL," + "`item_json` TEXT NULL" + ")";

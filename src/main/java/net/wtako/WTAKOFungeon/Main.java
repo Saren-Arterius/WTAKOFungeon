@@ -33,7 +33,7 @@ public final class Main extends JavaPlugin {
         if (Database.getInstance() == null) {
             try {
                 new Database();
-            } catch (SQLException e) {
+            } catch (final SQLException e) {
                 e.printStackTrace();
             }
         }

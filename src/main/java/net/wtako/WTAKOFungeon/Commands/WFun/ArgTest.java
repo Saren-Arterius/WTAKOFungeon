@@ -12,11 +12,11 @@ public class ArgTest {
     public static HashMap<Player, ArrayList<Location>> testingLocationPlayers = new HashMap<Player, ArrayList<Location>>();
 
     public ArgTest(CommandSender sender, String[] args) {
-        if (!testingLocationPlayers.containsKey(sender)) {
-            testingLocationPlayers.put((Player) sender, new ArrayList<Location>());
+        if (!ArgTest.testingLocationPlayers.containsKey(sender)) {
+            ArgTest.testingLocationPlayers.put((Player) sender, new ArrayList<Location>());
             sender.sendMessage("p1?");
         } else {
-            testingLocationPlayers.remove(sender).clear();
+            ArgTest.testingLocationPlayers.remove(sender).clear();
         }
     }
 

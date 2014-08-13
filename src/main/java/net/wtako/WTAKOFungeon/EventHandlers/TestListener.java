@@ -18,7 +18,7 @@ public class TestListener implements Listener {
             return;
         }
         event.setCancelled(true);
-        ArrayList<Location> locations = ArgTest.testingLocationPlayers.get(event.getPlayer());
+        final ArrayList<Location> locations = ArgTest.testingLocationPlayers.get(event.getPlayer());
         locations.add(event.getBlock().getLocation());
         switch (locations.size()) {
             case 1:
