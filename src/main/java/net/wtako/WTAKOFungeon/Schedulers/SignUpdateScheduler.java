@@ -8,16 +8,16 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 public class SignUpdateScheduler extends BukkitRunnable {
 
-    private SignUpdateScheduler instance;
+    private final SignUpdateScheduler instance;
 
     public SignUpdateScheduler() {
         instance = this;
-        this.runTaskTimer(Main.getInstance(), 0L, Config.SIGNS_UPDATE_INTERVAL.getLong());
+        runTaskTimer(Main.getInstance(), 0L, Config.SIGNS_UPDATE_INTERVAL.getLong());
     }
 
     @Override
     public void run() {
-        for (FungeonSign sign: FungeonSign.getValidFungeonSigns().values()) {
+        for (final FungeonSign sign: FungeonSign.getValidFungeonSigns().values()) {
             sign.updateSignText();
         }
     }

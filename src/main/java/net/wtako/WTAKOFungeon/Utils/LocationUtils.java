@@ -11,6 +11,13 @@ import org.bukkit.Location;
 
 public class LocationUtils {
 
+    public static void deleteLocation(int locID) throws SQLException {
+        final PreparedStatement delStmt = Database.getConn().prepareStatement("DELETE locations WHERE row_id = ?");
+        delStmt.setInt(1, locID);
+        delStmt.execute();
+        delStmt.close();
+    }
+
     public static int saveLocation(Location location) throws SQLException {
         final PreparedStatement insStmt = Database.getConn().prepareStatement(
                 "INSERT INTO locations (`world`, `x`, `y`, `z`) VALUES (?, ?, ?, ?)");
@@ -19,7 +26,7 @@ public class LocationUtils {
         insStmt.setDouble(3, location.getY());
         insStmt.setDouble(4, location.getZ());
         insStmt.execute();
-        int locID = insStmt.getGeneratedKeys().getInt(1);
+        final int locID = insStmt.getGeneratedKeys().getInt(1);
         insStmt.close();
         return locID;
     }

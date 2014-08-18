@@ -17,9 +17,20 @@ public enum Lang {
     FUNGEON("Fungeon"),
     FUNGEON_PLAYERS_FORMAT("{0}/{1}"),
     FUNGEON_TO_STRING_FORMAT("{0}. {1}"),
+    FUNGEON_ADD_SUCCESS("&aSuccessfully added a new fungeon. (Name: {0}, ID: {1})"),
+    LIST_TOTAL("Total: {0}"),
+    NO_FUNGEON_TO_DISPLAY("&eCurrently there is no fungeon to display."),
+
     COMMAND_HELP_SEPERATOR("&6 | &a"),
+    COMMAND_ARG_IN_USE("&e{0}&a"),
+    SUB_COMMAND("Sub-command: &e{0}"),
     HELP_HELP("Type &b/" + Main.getInstance().getProperty("mainCommand") + " &a{0}&f to show help (this message). {1}"),
     HELP_RELOAD("Type &b/" + Main.getInstance().getProperty("mainCommand") + " &a{0}&f to reload the plugin. {1}"),
+    HELP_TEST("Type &b/" + Main.getInstance().getProperty("mainCommand") + " &a{0}&f to perform tests."),
+    HELP_FUNGEON("Type &b/" + Main.getInstance().getProperty("mainCommand") + " &a{0}&f to manage fungeons."),
+    HELP_FUNGEON_ADD("Type &b/" + Main.getInstance().getProperty("mainCommand")
+            + " &a{0} &a<fungeon name>&f to add a new fungeon."),
+    HELP_FUNGEON_LIST("Type &b/" + Main.getInstance().getProperty("mainCommand") + " &a{0}&f to view all fungeons."),
     NO_PERMISSION_HELP("(&cno permission&f)"),
     PLUGIN_RELOADED("&aPlugin reloaded."),
     NO_PERMISSION_COMMAND("&cYou are not allowed to use this command."),
@@ -39,7 +50,7 @@ public enum Lang {
      *            The default string.
      */
     Lang(String start) {
-        this.path = name().toLowerCase().replace("_", "-");
+        path = name().toLowerCase().replace("_", "-");
         def = start;
     }
 

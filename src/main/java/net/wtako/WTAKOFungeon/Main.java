@@ -41,7 +41,15 @@ public final class Main extends JavaPlugin {
             }
         }
         getServer().getPluginManager().registerEvents(new TestListener(), this);
+    }
 
+    @Override
+    public void onDisable() {
+        try {
+            Database.getConn().close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     public void setupEcon() {

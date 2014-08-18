@@ -32,15 +32,15 @@ public class TestListener implements Listener {
             case 3:
                 event.getPlayer().sendMessage(
                         String.valueOf(Fungeon.isInRegion(locations.get(0), locations.get(1), locations.get(2))));
-                ArgTest.testingLocationPlayers.remove(event.getPlayer()).clear();
-                for (Location location: locations) {
+                for (final Location location: locations) {
                     try {
                         event.getPlayer().sendMessage(String.valueOf(LocationUtils.saveLocation(location)));
-                    } catch (SQLException e) {
+                    } catch (final SQLException e) {
                         // TODO Auto-generated catch block
                         e.printStackTrace();
                     }
                 }
+                ArgTest.testingLocationPlayers.remove(event.getPlayer()).clear();
                 break;
         }
     }

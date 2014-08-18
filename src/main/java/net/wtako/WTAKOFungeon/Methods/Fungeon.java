@@ -25,6 +25,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 public class Fungeon {
 
     private static HashMap<Integer, Fungeon> validFungeons = new HashMap<Integer, Fungeon>();
+    private static HashMap<Integer, Fungeon> allFungeons   = new HashMap<Integer, Fungeon>();
     private final ArrayList<Player>          players       = new ArrayList<Player>();
     private final boolean                    isPlaying     = false;
     private Integer                          id;
@@ -45,7 +46,7 @@ public class Fungeon {
 
     public Fungeon(int fungeonID) throws SQLException {
         final PreparedStatement selStmt = Database.getConn()
-                .prepareStatement("SELECT * FROM funegons WHERE row_id = ?");
+                .prepareStatement("SELECT * FROM fungeons WHERE row_id = ?");
         selStmt.setInt(1, fungeonID);
         final ResultSet result = selStmt.executeQuery();
         if (!result.next()) {
@@ -54,20 +55,19 @@ public class Fungeon {
             return;
         }
         id = fungeonID;
-        name = result.getString("funegon_name");
+        name = result.getString("fungeon_name");
         fungeonTimeLimit = result.getInt("time_limit");
         minPlayers = result.getInt("min_players");
         maxPlayers = result.getInt("max_players");
-        waitRoomTime = result.getInt("waitTime");
+        waitRoomTime = result.getInt("wait_time");
         lobby = LocationUtils.getLocation(result.getInt("lobby_loc_id"));
         waitRoom = LocationUtils.getLocation(result.getInt("wait_rm_loc_id"));
         areaP1 = LocationUtils.getLocation(result.getInt("area_p1_loc_id"));
         areaP2 = LocationUtils.getLocation(result.getInt("area_p2_loc_id"));
         startPoint = LocationUtils.getLocation(result.getInt("start_pt_loc_id"));
         invokeCommand = result.getString("run_command");
+        Fungeon.allFungeons.put(fungeonID, this);
         if (checkValidity() == Validity.VALID) {
-            fungeonTimer = fungeonTimeLimit;
-            waitRoomTimer = waitRoomTime;
             Fungeon.validFungeons.put(fungeonID, this);
         }
     }
@@ -122,8 +122,9 @@ public class Fungeon {
             return;
         }
         int enemiesAlive = 0;
-        for (Entity mob: startPoint.getWorld().getEntities()) {
-            if ((mob instanceof Monster || mob instanceof Animals) && isInRegion(areaP1, areaP2, mob.getLocation())) {
+        for (final Entity mob: startPoint.getWorld().getEntities()) {
+            if ((mob instanceof Monster || mob instanceof Animals)
+                    && Fungeon.isInRegion(areaP1, areaP2, mob.getLocation())) {
                 enemiesAlive++;
             }
         }
@@ -136,12 +137,6 @@ public class Fungeon {
             lose();
         }
 
-    }
-
-    public void mainLoop() {
-        assert id != null;
-        assert fungeonTimer != null;
-        assert waitRoomTimer != null;
     }
 
     public Error addPlayer(Player player) {
@@ -199,7 +194,7 @@ public class Fungeon {
         if (players.size() >= minPlayers) {
             return Error.NOT_ENOUGH_PLAYERS;
         }
-        for (Player player: players) {
+        for (final Player player: players) {
             player.teleport(startPoint);
         }
         return Error.SUCCESS;
@@ -212,7 +207,7 @@ public class Fungeon {
         if (getStatus() == Status.PLAYING) {
             return Error.FUNGEON_HAS_ALREADY_STARTED;
         }
-        for (Player player: players) {
+        for (final Player player: players) {
             player.teleport(startPoint);
         }
         return Error.SUCCESS;
@@ -242,7 +237,7 @@ public class Fungeon {
                             }
                         }
                     }.runTask(Main.getInstance());
-                } catch (SQLException e) {
+                } catch (final SQLException e) {
                     for (final Player player: new ArrayList<Player>(players)) {
                         playerLeave(player);
                         player.sendMessage(Lang.DB_EXCEPTION.toString());
@@ -281,7 +276,7 @@ public class Fungeon {
         if (name.equalsIgnoreCase("")) {
             return Validity.FUNGEON_NAME_IS_EMPTY;
         }
-        if (invokeCommand.equalsIgnoreCase("")) {
+        if (invokeCommand == null || invokeCommand.equalsIgnoreCase("")) {
             return Validity.INVOKE_COMMAND_IS_NULL;
         }
         if (fungeonTimeLimit == null || fungeonTimeLimit <= 60 || waitRoomTime == null || waitRoomTime <= 0) {
@@ -322,12 +317,17 @@ public class Fungeon {
         return players;
     }
 
+    @Override
     public String toString() {
-        return MessageFormat.format(Lang.FUNGEON_PLAYERS_FORMAT.toString(), id, name);
+        return MessageFormat.format(Lang.FUNGEON_TO_STRING_FORMAT.toString(), id, name);
     }
 
     public static HashMap<Integer, Fungeon> getValidFungeons() {
-        return validFungeons;
+        return Fungeon.validFungeons;
+    }
+
+    public static HashMap<Integer, Fungeon> getAllFungeons() {
+        return Fungeon.allFungeons;
     }
 
     private static void awardPlayer(Player player, ArrayList<ItemStack> itemPrizes) {
@@ -369,7 +369,7 @@ public class Fungeon {
     public static ArrayList<ItemStack> getItemPrizes(int fungeonID) throws SQLException {
         final ArrayList<ItemStack> prizes = new ArrayList<ItemStack>();
         final PreparedStatement selStmt = Database.getConn().prepareStatement(
-                "SELECT * FROM prizes WHERE funegon_id = ? AND item_json IS NOT NULL");
+                "SELECT * FROM prizes WHERE fungeon_id = ? AND item_json IS NOT NULL");
         selStmt.setInt(1, fungeonID);
         final ResultSet result = selStmt.executeQuery();
         while (result.next()) {
@@ -383,7 +383,7 @@ public class Fungeon {
     public static int getCashPrize(int fungeonID) throws SQLException {
         int cashPrize = 0;
         final PreparedStatement selStmt = Database.getConn().prepareStatement(
-                "SELECT * FROM prizes WHERE funegon_id = ? AND cash_amount >= 0");
+                "SELECT * FROM prizes WHERE fungeon_id = ? AND cash_amount >= 0");
         selStmt.setInt(1, fungeonID);
         final ResultSet result = selStmt.executeQuery();
         while (result.next()) {

@@ -20,7 +20,7 @@ public class FungeonSign {
 
     public FungeonSign(int signID) throws SQLException {
         final PreparedStatement selStmt = Database.getConn().prepareStatement(
-                "SELECT * FROM funegon_signs WHERE row_id = ?");
+                "SELECT * FROM fungeon_signs WHERE row_id = ?");
         selStmt.setInt(1, signID);
         final ResultSet result = selStmt.executeQuery();
         if (!result.next()) {
@@ -31,7 +31,7 @@ public class FungeonSign {
         targetFungeon = Fungeon.getValidFungeons().get(result.getInt("fungeon_id"));
         location = LocationUtils.getLocation(result.getInt("loc_id"));
         if (location != null) {
-            validFungeonSigns.put(location, this);
+            FungeonSign.validFungeonSigns.put(location, this);
         }
     }
 
@@ -40,7 +40,7 @@ public class FungeonSign {
     }
 
     public void updateSignText() {
-        Sign sign = getSign();
+        final Sign sign = getSign();
         sign.setLine(0, Lang.FUNGEON.toString());
         sign.setLine(1, targetFungeon.toString());
         sign.setLine(2, targetFungeon.getStatus().name());
@@ -49,6 +49,6 @@ public class FungeonSign {
     }
 
     public static HashMap<Location, FungeonSign> getValidFungeonSigns() {
-        return validFungeonSigns;
+        return FungeonSign.validFungeonSigns;
     }
 }

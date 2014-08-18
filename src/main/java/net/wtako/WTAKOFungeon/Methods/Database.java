@@ -34,19 +34,19 @@ public class Database {
 
     public void createTables() throws SQLException {
         final Statement cur = conn.createStatement();
-        String stmt = "CREATE TABLE `funegons` (" + "`row_id` INTEGER PRIMARY KEY AUTOINCREMENT, "
-                + "`enabled` INT NOT NULL, `funegon_name` TEXT NOT NULL, " + "`time_limit` INT NOT NULL,"
+        String stmt = "CREATE TABLE `fungeons` (" + "`row_id` INTEGER PRIMARY KEY AUTOINCREMENT, "
+                + "`enabled` INT NOT NULL, `fungeon_name` TEXT NOT NULL, " + "`time_limit` INT NOT NULL,"
                 + "`min_players` INT NOT NULL," + "`max_players` INT NOT NULL," + "`wait_time` INT NOT NULL,"
                 + "`lobby_loc_id` INT NULL," + "`area_p1_loc_id` INT NULL," + "`area_p2_loc_id` INT NULL,"
                 + "`wait_rm_loc_id` INT NULL," + "`start_pt_loc_id` INT NULL," + "`run_command` TEXT NULL" + ")";
         cur.execute(stmt);
-        stmt = "CREATE TABLE `funegon_signs` (" + "`row_id` INTEGER PRIMARY KEY AUTOINCREMENT, "
-                + "`funegon_id` INT NOT NULL," + "loc_id` INT NOT NULL" + ")";
+        stmt = "CREATE TABLE `fungeon_signs` (" + "`row_id` INTEGER PRIMARY KEY AUTOINCREMENT, "
+                + "`fungeon_id` INT NOT NULL," + "`loc_id` INT NOT NULL" + ")";
         cur.execute(stmt);
         stmt = "CREATE TABLE `prizes` (" + "`row_id` INTEGER PRIMARY KEY AUTOINCREMENT, "
-                + "`funegon_id` INT NOT NULL," + "`cash_amount` INT NULL," + "`item_json` TEXT NULL" + ")";
+                + "`fungeon_id` INT NOT NULL," + "`cash_amount` INT NULL," + "`item_json` TEXT NULL" + ")";
         cur.execute(stmt);
-        stmt = "CREATE TABLE `costs` (" + "`row_id` INTEGER PRIMARY KEY AUTOINCREMENT, " + "`funegon_id` INT NOT NULL,"
+        stmt = "CREATE TABLE `costs` (" + "`row_id` INTEGER PRIMARY KEY AUTOINCREMENT, " + "`fungeon_id` INT NOT NULL,"
                 + "`cost_type` TEXT NOT NULL," + "`item_meta_json` TEXT NULL," + "`amount` INT NULL" + ")";
         cur.execute(stmt);
         stmt = "CREATE TABLE `locations` (" + "`row_id` INTEGER PRIMARY KEY AUTOINCREMENT, " + "`world` TEXT NOT NULL,"
