@@ -40,6 +40,9 @@ public class Database {
                 + "`lobby_loc_id` INT NULL," + "`area_p1_loc_id` INT NULL," + "`area_p2_loc_id` INT NULL,"
                 + "`wait_rm_loc_id` INT NULL," + "`start_pt_loc_id` INT NULL," + "`run_command` TEXT NULL" + ")";
         cur.execute(stmt);
+        stmt = "CREATE TABLE `funegon_signs` (" + "`row_id` INTEGER PRIMARY KEY AUTOINCREMENT, "
+                + "`funegon_id` INT NOT NULL," + "loc_id` INT NOT NULL" + ")";
+        cur.execute(stmt);
         stmt = "CREATE TABLE `prizes` (" + "`row_id` INTEGER PRIMARY KEY AUTOINCREMENT, "
                 + "`funegon_id` INT NOT NULL," + "`cash_amount` INT NULL," + "`item_json` TEXT NULL" + ")";
         cur.execute(stmt);

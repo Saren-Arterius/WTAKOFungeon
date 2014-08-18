@@ -1,9 +1,11 @@
 package net.wtako.WTAKOFungeon.EventHandlers;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 import net.wtako.WTAKOFungeon.Commands.WFun.ArgTest;
 import net.wtako.WTAKOFungeon.Methods.Fungeon;
+import net.wtako.WTAKOFungeon.Utils.LocationUtils;
 
 import org.bukkit.Location;
 import org.bukkit.event.EventHandler;
@@ -31,6 +33,14 @@ public class TestListener implements Listener {
                 event.getPlayer().sendMessage(
                         String.valueOf(Fungeon.isInRegion(locations.get(0), locations.get(1), locations.get(2))));
                 ArgTest.testingLocationPlayers.remove(event.getPlayer()).clear();
+                for (Location location: locations) {
+                    try {
+                        event.getPlayer().sendMessage(String.valueOf(LocationUtils.saveLocation(location)));
+                    } catch (SQLException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                }
                 break;
         }
     }
