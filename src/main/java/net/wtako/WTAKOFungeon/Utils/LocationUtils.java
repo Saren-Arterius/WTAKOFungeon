@@ -19,6 +19,9 @@ public class LocationUtils {
     }
 
     public static int saveLocation(Location location) throws SQLException {
+        if (location == null) {
+            return -1;
+        }
         final PreparedStatement insStmt = Database.getConn().prepareStatement(
                 "INSERT INTO locations (`world`, `x`, `y`, `z`) VALUES (?, ?, ?, ?)");
         insStmt.setString(1, location.getWorld().getName());
@@ -49,6 +52,9 @@ public class LocationUtils {
     }
 
     public static Integer getLocationID(Location location) throws SQLException {
+        if (location == null) {
+            return null;
+        }
         final PreparedStatement selStmt = Database.getConn().prepareStatement(
                 "SELECT * FROM locations WHERE world = ? AND x = ? AND y = ? AND z = ?");
         selStmt.setString(1, location.getWorld().getName());

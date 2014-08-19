@@ -27,14 +27,14 @@ public class Fungeon {
     private static HashMap<Integer, Fungeon> validFungeons = new HashMap<Integer, Fungeon>();
     private static HashMap<Integer, Fungeon> allFungeons   = new HashMap<Integer, Fungeon>();
     private final ArrayList<Player>          players       = new ArrayList<Player>();
-    private final boolean                    isPlaying     = false;
+    private boolean                          isPlaying     = false;
     private Integer                          id;
     private boolean                          enabled       = true;
     private String                           name;
     private Integer                          fungeonTimeLimit;
     private Integer                          minPlayers;
     private Integer                          maxPlayers;
-    private Integer                          waitRoomTime;
+    private Integer                          waitRoomTimeLimit;
     private Location                         lobby;
     private Location                         waitRoom;
     private Location                         areaP1;
@@ -61,7 +61,7 @@ public class Fungeon {
         fungeonTimeLimit = result.getInt("time_limit");
         minPlayers = result.getInt("min_players");
         maxPlayers = result.getInt("max_players");
-        waitRoomTime = result.getInt("wait_time");
+        waitRoomTimeLimit = result.getInt("wait_time");
         lobby = LocationUtils.getLocation(result.getInt("lobby_loc_id"));
         waitRoom = LocationUtils.getLocation(result.getInt("wait_rm_loc_id"));
         areaP1 = LocationUtils.getLocation(result.getInt("area_p1_loc_id"));
@@ -80,7 +80,7 @@ public class Fungeon {
         FUNGEON_NAME_IS_EMPTY,
         LOBBY_IS_NULL,
         WAIT_ROOM_IS_NULL,
-        MIN_PLAYERS_IS_GREATER_THAN_MAX_PLAYERS,
+        MAX_PLAYERS_IS_LESSER_THAN_MIN_PLAYERS,
         MIN_PLAYERS_IS_LESS_THAN_1,
         AREA_P1_IS_NULL,
         AREA_P2_IS_NULL,
@@ -112,11 +112,11 @@ public class Fungeon {
 
     public void checkWaitingRoom() {
         if (getStatus() != Status.WAITING_OTHER_PLAYERS) {
-            waitRoomTimer = waitRoomTime;
+            waitRoomTimer = waitRoomTimeLimit;
             return;
         }
         if (waitRoomTimer-- <= 0) {
-            start();
+            start(false);
         }
     }
 
@@ -142,6 +142,13 @@ public class Fungeon {
             lose();
         }
 
+    }
+
+    public void forceReset() {
+        for (final Player player: new ArrayList<Player>(players)) {
+            player.teleport(lobby);
+        }
+        players.clear();
     }
 
     public Error addPlayer(Player player) {
@@ -202,32 +209,29 @@ public class Fungeon {
         return Error.SUCCESS;
     }
 
-    public Error start() {
+    public Error start(boolean force) {
         if (checkValidity() != Validity.VALID) {
             return Error.FUNGEON_NOT_VALID;
         }
         if (getStatus() == Status.PLAYING) {
             return Error.FUNGEON_HAS_ALREADY_STARTED;
         }
-        if (players.size() >= minPlayers) {
-            return Error.NOT_ENOUGH_PLAYERS;
+        if (!force) {
+            if (players.size() >= minPlayers) {
+                return Error.NOT_ENOUGH_PLAYERS;
+            }
         }
         for (final Player player: players) {
             player.teleport(startPoint);
         }
-        return Error.SUCCESS;
-    }
-
-    public Error forceStart() {
-        if (checkValidity() != Validity.VALID) {
-            return Error.FUNGEON_NOT_VALID;
-        }
-        if (getStatus() == Status.PLAYING) {
-            return Error.FUNGEON_HAS_ALREADY_STARTED;
-        }
-        for (final Player player: players) {
-            player.teleport(startPoint);
-        }
+        isPlaying = true;
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                Main.getInstance().getServer()
+                        .dispatchCommand(Main.getInstance().getServer().getConsoleSender(), invokeCommand);
+            }
+        }.runTaskLater(Main.getInstance(), Config.INVOKE_COMMAND_DELAY_SECONDS.getLong() * 20L);
         return Error.SUCCESS;
     }
 
@@ -239,6 +243,7 @@ public class Fungeon {
         if (getStatus() != Status.PLAYING) {
             return Error.FUNGEON_HAS_NOT_STARTED;
         }
+        isPlaying = false;
         new BukkitRunnable() {
             @Override
             public void run() {
@@ -271,6 +276,7 @@ public class Fungeon {
         if (getStatus() != Status.PLAYING) {
             return Error.FUNGEON_HAS_NOT_STARTED;
         }
+        isPlaying = false;
         for (final Player player: new ArrayList<Player>(players)) {
             playerLeave(player);
         }
@@ -300,7 +306,7 @@ public class Fungeon {
         if (invokeCommand == null || invokeCommand.equalsIgnoreCase("")) {
             return Validity.INVOKE_COMMAND_IS_NULL;
         }
-        if (fungeonTimeLimit == null || fungeonTimeLimit <= 60 || waitRoomTime == null || waitRoomTime <= 0) {
+        if (fungeonTimeLimit == null || fungeonTimeLimit <= 60 || waitRoomTimeLimit == null || waitRoomTimeLimit <= 0) {
             return Validity.DEFAULT_VALUE_FAIL;
         }
         if (lobby == null) {
@@ -319,7 +325,7 @@ public class Fungeon {
             return Validity.START_POINT_IS_NULL;
         }
         if (minPlayers > maxPlayers) {
-            return Validity.MIN_PLAYERS_IS_GREATER_THAN_MAX_PLAYERS;
+            return Validity.MAX_PLAYERS_IS_LESSER_THAN_MIN_PLAYERS;
         }
         if (minPlayers < 1) {
             return Validity.MIN_PLAYERS_IS_LESS_THAN_1;
@@ -338,7 +344,7 @@ public class Fungeon {
         upStmt.setInt(2, fungeonTimeLimit);
         upStmt.setInt(3, minPlayers);
         upStmt.setInt(4, maxPlayers);
-        upStmt.setInt(5, waitRoomTime);
+        upStmt.setInt(5, waitRoomTimeLimit);
         upStmt.setString(6, invokeCommand);
         upStmt.setInt(7, id);
         upStmt.execute();
@@ -377,6 +383,64 @@ public class Fungeon {
         upStmt.setInt(6, id);
         upStmt.execute();
         upStmt.close();
+    }
+
+    public Validity setAreaStartPoint(Location p1, Location p2, Location startPt) {
+        if (!Fungeon.isInRegion(p1, p2, startPt)) {
+            return Validity.START_POINT_NOT_IN_AREA;
+        }
+        areaP1 = p1;
+        areaP2 = p2;
+        startPoint = startPt;
+        return Validity.VALID;
+    }
+
+    public Validity setMinMaxPlayers(Integer minPlayers, Integer maxPlayers) {
+        if (minPlayers < 1) {
+            return Validity.MIN_PLAYERS_IS_LESS_THAN_1;
+        }
+        if (maxPlayers < minPlayers) {
+            return Validity.MAX_PLAYERS_IS_LESSER_THAN_MIN_PLAYERS;
+        }
+        this.minPlayers = minPlayers;
+        this.maxPlayers = maxPlayers;
+        return Validity.VALID;
+    }
+
+    public String getInvokeCommand() {
+        return invokeCommand;
+    }
+
+    public Validity setInvokeCommand(String command) {
+        if (command.equalsIgnoreCase("")) {
+            return Validity.INVOKE_COMMAND_IS_NULL;
+        }
+        invokeCommand = command;
+        return Validity.VALID;
+    }
+
+    public int getWaitRoomTimeLimit() {
+        return waitRoomTimeLimit;
+    }
+
+    public Validity setWaitRoomTimeLimit(int sec) {
+        if (sec <= 0) {
+            return Validity.DEFAULT_VALUE_FAIL;
+        }
+        waitRoomTimeLimit = sec;
+        return Validity.VALID;
+    }
+
+    public int getFungeonTimeLimit() {
+        return fungeonTimeLimit;
+    }
+
+    public Validity setFungeonTimeLimit(int sec) {
+        if (sec <= 60) {
+            return Validity.DEFAULT_VALUE_FAIL;
+        }
+        fungeonTimeLimit = sec;
+        return Validity.VALID;
     }
 
     public boolean isEnabled() {
@@ -483,6 +547,16 @@ public class Fungeon {
         result.close();
         selStmt.close();
         return cashPrize;
+    }
+
+    public static void loadAllFungeons() throws SQLException {
+        final PreparedStatement selStmt = Database.getConn().prepareStatement("SELECT row_id FROM `fungeons`");
+        final ResultSet result = selStmt.executeQuery();
+        while (result.next()) {
+            new Fungeon(result.getInt("row_id"));
+        }
+        result.close();
+        selStmt.close();
     }
 
 }

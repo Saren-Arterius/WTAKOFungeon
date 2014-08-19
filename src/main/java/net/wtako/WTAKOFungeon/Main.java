@@ -12,6 +12,7 @@ import net.wtako.WTAKOFungeon.Commands.CommandWFun;
 import net.wtako.WTAKOFungeon.EventHandlers.FungeonWizardListener;
 import net.wtako.WTAKOFungeon.EventHandlers.TestListener;
 import net.wtako.WTAKOFungeon.Methods.Database;
+import net.wtako.WTAKOFungeon.Methods.Fungeon;
 import net.wtako.WTAKOFungeon.Utils.Config;
 import net.wtako.WTAKOFungeon.Utils.Lang;
 
@@ -37,6 +38,7 @@ public final class Main extends JavaPlugin {
         if (Database.getInstance() == null) {
             try {
                 new Database();
+                Fungeon.loadAllFungeons();
             } catch (final SQLException e) {
                 e.printStackTrace();
             }
@@ -49,6 +51,11 @@ public final class Main extends JavaPlugin {
     public void onDisable() {
         try {
             Database.getConn().close();
+            Fungeon.getValidFungeons().clear();
+            for (final Fungeon fungeon: Fungeon.getAllFungeons().values()) {
+                fungeon.forceReset();
+            }
+            Fungeon.getAllFungeons().clear();
         } catch (final SQLException e) {
             e.printStackTrace();
         }

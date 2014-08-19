@@ -7,14 +7,19 @@ import java.util.HashMap;
 
 import net.wtako.WTAKOFungeon.Methods.Fungeon;
 import net.wtako.WTAKOFungeon.Methods.Fungeon.Validity;
+import net.wtako.WTAKOFungeon.Methods.SetWizard.AreaStartWizard;
 import net.wtako.WTAKOFungeon.Methods.SetWizard.BaseWizard;
 import net.wtako.WTAKOFungeon.Methods.SetWizard.EnabledWizard;
+import net.wtako.WTAKOFungeon.Methods.SetWizard.InvokeCommandWizard;
+import net.wtako.WTAKOFungeon.Methods.SetWizard.MinMaxPlayersWizard;
 import net.wtako.WTAKOFungeon.Methods.SetWizard.NameWizard;
+import net.wtako.WTAKOFungeon.Methods.SetWizard.TimeLimitsWizard;
 import net.wtako.WTAKOFungeon.Utils.Lang;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 
 public class FungeonWizardListener implements Listener {
@@ -28,8 +33,12 @@ public class FungeonWizardListener implements Listener {
     }
 
     public enum FungeonConfig {
+        AREA_START(WizardType.BLOCK_BREAK, AreaStartWizard.class),
         NAME(WizardType.INPUT, NameWizard.class),
-        ENABLED(WizardType.INPUT, EnabledWizard.class);
+        ENABLED(WizardType.INPUT, EnabledWizard.class),
+        TIME_LIMITS(WizardType.INPUT, TimeLimitsWizard.class),
+        INVOKE_COMMAND(WizardType.INPUT, InvokeCommandWizard.class),
+        MIN_MAX_PLAYERS(WizardType.INPUT, MinMaxPlayersWizard.class);
 
         private final Class<?>   targetClass;
         private final WizardType type;
@@ -56,13 +65,35 @@ public class FungeonWizardListener implements Listener {
             return null;
         }
         /*
-         * TIME_LIMITS,
          * AREA_AND_START_LOCATION,
          * LOBBY_LOCATION,
          * WAIT_ROOM_LOCATION,
-         * MIN_MAX_PLAYERS,
-         * INVOKE_COMMAND;
+         * ,
          */
+    }
+
+    @EventHandler
+    public void onPlayerBreakBlock(BlockBreakEvent event) throws SQLException {
+        if (!FungeonWizardListener.inWizards.containsKey(event.getPlayer())) {
+            return;
+        }
+        final BaseWizard wizard = FungeonWizardListener.inWizards.get(event.getPlayer());
+        if (FungeonConfig.getConfig(wizard.getClass()).getWizardType() != WizardType.BLOCK_BREAK) {
+            return;
+        }
+        event.setCancelled(true);
+        final Validity result = wizard.setValue(event.getBlock().getLocation());
+        if (result == Validity.VALID) {
+            event.getPlayer().sendMessage(
+                    MessageFormat.format(Lang.CONFIG_SET.toString(), FungeonConfig.getConfig(wizard.getClass()), event
+                            .getBlock().getLocation().toString()));
+            FungeonWizardListener.inWizards.remove(event.getPlayer());
+        } else if (result != Validity.PENDING) {
+            event.getPlayer().sendMessage(
+                    MessageFormat.format(Lang.CONFIG_SET_FAIL.toString(), FungeonConfig.getConfig(wizard.getClass()),
+                            event.getBlock().getLocation().toString(), result.name()));
+        }
+
     }
 
     @EventHandler
@@ -87,7 +118,8 @@ public class FungeonWizardListener implements Listener {
                                         FungeonWizardListener.inStartWizards.get(event.getPlayer())));
                 FungeonWizardListener.inStartWizards.remove(event.getPlayer());
             } catch (final IllegalArgumentException e) {
-                event.getPlayer().sendMessage(Lang.NO_SUCH_A_CONFIG.toString());
+                event.getPlayer().sendMessage(
+                        MessageFormat.format(Lang.NO_SUCH_A_CONFIG.toString(), event.getMessage().toUpperCase()));
             } catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException
                     | InvocationTargetException e) {
                 e.printStackTrace();
@@ -106,7 +138,11 @@ public class FungeonWizardListener implements Listener {
                         MessageFormat.format(Lang.CONFIG_SET.toString(), FungeonConfig.getConfig(wizard.getClass()),
                                 event.getMessage()));
                 FungeonWizardListener.inWizards.remove(event.getPlayer());
-            } else if (result != Validity.PENDING) {
+            } else if (result == Validity.PENDING) {
+                event.getPlayer().sendMessage(
+                        MessageFormat.format(Lang.CONFIG_SET_PENDING.toString(),
+                                FungeonConfig.getConfig(wizard.getClass()), event.getMessage()));
+            } else {
                 event.getPlayer().sendMessage(
                         MessageFormat.format(Lang.CONFIG_SET_FAIL.toString(),
                                 FungeonConfig.getConfig(wizard.getClass()), event.getMessage(), result.name()));

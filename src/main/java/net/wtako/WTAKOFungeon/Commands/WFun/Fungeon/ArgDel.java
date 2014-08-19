@@ -30,9 +30,7 @@ public class ArgDel {
         Fungeon.getValidFungeons().remove(fungeonID);
         final Fungeon fungeon = Fungeon.getAllFungeons().remove(fungeonID);
         if (fungeon != null) {
-            if (fungeon.kickAll() == Fungeon.Error.FUNGEON_HAS_ALREADY_STARTED) {
-                fungeon.forceEnd();
-            }
+            fungeon.forceReset();
         }
         if (fungeon != null) {
             try {

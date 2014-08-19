@@ -12,6 +12,7 @@ public enum Config {
     DEFAULT_MAX_PLAYERS("fungeon.default.max-players", 8),
     DEFAULT_WAITING_ROOM_TIME("fungeon.default.waiting-room-time", 60),
     NO_ENEMIES_WIN_TIMER("fungeon.win-timer", 10),
+    INVOKE_COMMAND_DELAY_SECONDS("fungeon.invoke-command-delay-seconds", 5),
     SIGNS_UPDATE_INTERVAL("task.signs-update-interval-ticks", 20),
     PLUGIN_ENABLED("system.plugin-enabled", true);
 
