@@ -13,7 +13,7 @@ public class ArgList {
     public ArgList(CommandSender sender, String[] args) {
         int fungeons = 0;
         for (final Fungeon fungeon: Fungeon.getAllFungeons().values()) {
-            Status status = fungeon.getStatus();
+            final Status status = fungeon.getStatus();
             if (status == Fungeon.Status.FUNGEON_NOT_VALID) {
                 sender.sendMessage(MessageFormat.format("{0} - {1} ({2})", fungeon, status, fungeon.checkValidity()));
             } else {

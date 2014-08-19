@@ -47,4 +47,23 @@ public class LocationUtils {
         selStmt.close();
         return location;
     }
+
+    public static Integer getLocationID(Location location) throws SQLException {
+        final PreparedStatement selStmt = Database.getConn().prepareStatement(
+                "SELECT * FROM locations WHERE world = ? AND x = ? AND y = ? AND z = ?");
+        selStmt.setString(1, location.getWorld().getName());
+        selStmt.setDouble(2, location.getX());
+        selStmt.setDouble(3, location.getY());
+        selStmt.setDouble(4, location.getZ());
+        final ResultSet result = selStmt.executeQuery();
+        if (!result.next()) {
+            result.close();
+            selStmt.close();
+            return null;
+        }
+        final int locID = result.getInt("row_id");
+        result.close();
+        selStmt.close();
+        return locID;
+    }
 }

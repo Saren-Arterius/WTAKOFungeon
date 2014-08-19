@@ -4,7 +4,9 @@ import java.lang.reflect.InvocationTargetException;
 
 import net.wtako.WTAKOFungeon.Main;
 import net.wtako.WTAKOFungeon.Commands.WFun.Fungeon.ArgAdd;
+import net.wtako.WTAKOFungeon.Commands.WFun.Fungeon.ArgDel;
 import net.wtako.WTAKOFungeon.Commands.WFun.Fungeon.ArgList;
+import net.wtako.WTAKOFungeon.Commands.WFun.Fungeon.ArgSet;
 import net.wtako.WTAKOFungeon.Utils.BaseCommands;
 import net.wtako.WTAKOFungeon.Utils.Commands;
 import net.wtako.WTAKOFungeon.Utils.Lang;
@@ -16,7 +18,9 @@ public class SubArgFungeon {
     public enum SubCommands implements BaseCommands {
         MAIN_COMMAND(Lang.HELP_FUNGEON.toString(), SubArgFungeon.class, Main.artifactId + ".use"),
         LIST(Lang.HELP_FUNGEON_LIST.toString(), ArgList.class, Main.artifactId + ".use"),
-        ADD(Lang.HELP_FUNGEON_ADD.toString(), ArgAdd.class, Main.artifactId + ".admin");
+        ADD(Lang.HELP_FUNGEON_ADD.toString(), ArgAdd.class, Main.artifactId + ".admin"),
+        DEL(Lang.HELP_FUNGEON_DEL.toString(), ArgDel.class, Main.artifactId + ".admin"),
+        SET(Lang.HELP_FUNGEON_SET.toString(), ArgSet.class, Main.artifactId + ".admin");
 
         private String   helpMessage;
         private Class<?> targetClass;

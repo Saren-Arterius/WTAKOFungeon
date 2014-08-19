@@ -16,7 +16,8 @@ public class ArgAdd {
 
     public ArgAdd(CommandSender sender, String[] args) {
         if (args.length < 3) {
-            sender.sendMessage(MessageFormat.format(Lang.HELP_FUNGEON_ADD.toString(), Commands.joinArgsInUse(args, 2)));
+            sender.sendMessage(MessageFormat.format(Lang.HELP_FUNGEON_ADD.toString(),
+                    Commands.joinArgsInUse(args, args.length)));
             return;
         }
         try {

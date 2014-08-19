@@ -9,6 +9,7 @@ import java.util.logging.Logger;
 
 import net.milkbowl.vault.economy.Economy;
 import net.wtako.WTAKOFungeon.Commands.CommandWFun;
+import net.wtako.WTAKOFungeon.EventHandlers.FungeonWizardListener;
 import net.wtako.WTAKOFungeon.EventHandlers.TestListener;
 import net.wtako.WTAKOFungeon.Methods.Database;
 import net.wtako.WTAKOFungeon.Utils.Config;
@@ -41,13 +42,14 @@ public final class Main extends JavaPlugin {
             }
         }
         getServer().getPluginManager().registerEvents(new TestListener(), this);
+        getServer().getPluginManager().registerEvents(new FungeonWizardListener(), this);
     }
 
     @Override
     public void onDisable() {
         try {
             Database.getConn().close();
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             e.printStackTrace();
         }
     }

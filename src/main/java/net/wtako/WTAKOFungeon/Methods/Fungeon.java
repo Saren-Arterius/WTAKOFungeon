@@ -29,6 +29,7 @@ public class Fungeon {
     private final ArrayList<Player>          players       = new ArrayList<Player>();
     private final boolean                    isPlaying     = false;
     private Integer                          id;
+    private boolean                          enabled       = true;
     private String                           name;
     private Integer                          fungeonTimeLimit;
     private Integer                          minPlayers;
@@ -55,6 +56,7 @@ public class Fungeon {
             return;
         }
         id = fungeonID;
+        enabled = result.getInt("enabled") == 0 ? false : true;
         name = result.getString("fungeon_name");
         fungeonTimeLimit = result.getInt("time_limit");
         minPlayers = result.getInt("min_players");
@@ -73,6 +75,7 @@ public class Fungeon {
     }
 
     public enum Validity {
+        NOT_ENABLED,
         DEFAULT_VALUE_FAIL,
         FUNGEON_NAME_IS_EMPTY,
         LOBBY_IS_NULL,
@@ -84,6 +87,8 @@ public class Fungeon {
         START_POINT_IS_NULL,
         INVOKE_COMMAND_IS_NULL,
         START_POINT_NOT_IN_AREA,
+        PARSE_FAIL,
+        PENDING,
         VALID
     }
 
@@ -184,6 +189,19 @@ public class Fungeon {
         return Error.SUCCESS;
     }
 
+    public Error kickAll() {
+        if (checkValidity() != Validity.VALID) {
+            return Error.FUNGEON_NOT_VALID;
+        }
+        if (isPlaying) {
+            return Error.FUNGEON_HAS_ALREADY_STARTED;
+        }
+        for (final Player player: new ArrayList<Player>(players)) {
+            kickPlayer(player);
+        }
+        return Error.SUCCESS;
+    }
+
     public Error start() {
         if (checkValidity() != Validity.VALID) {
             return Error.FUNGEON_NOT_VALID;
@@ -273,6 +291,9 @@ public class Fungeon {
     }
 
     public Validity checkValidity() {
+        if (!enabled) {
+            return Validity.NOT_ENABLED;
+        }
         if (name.equalsIgnoreCase("")) {
             return Validity.FUNGEON_NAME_IS_EMPTY;
         }
@@ -306,6 +327,76 @@ public class Fungeon {
         if (!Fungeon.isInRegion(areaP1, areaP2, startPoint)) {
             return Validity.START_POINT_NOT_IN_AREA;
         }
+        return Validity.VALID;
+    }
+
+    public void save() throws SQLException {
+        final PreparedStatement upStmt = Database.getConn().prepareStatement(
+                "UPDATE `fungeons` SET `fungeon_name` = ?, `time_limit` = ?, `min_players` = ?,"
+                        + "`max_players` = ?, `wait_time` = ?, `run_command` = ? WHERE `row_id` = ?");
+        upStmt.setString(1, name);
+        upStmt.setInt(2, fungeonTimeLimit);
+        upStmt.setInt(3, minPlayers);
+        upStmt.setInt(4, maxPlayers);
+        upStmt.setInt(5, waitRoomTime);
+        upStmt.setString(6, invokeCommand);
+        upStmt.setInt(7, id);
+        upStmt.execute();
+        upStmt.close();
+    }
+
+    public void saveLocations() throws SQLException {
+        Integer lobbyID = LocationUtils.getLocationID(lobby);
+        if (lobbyID == null) {
+            lobbyID = LocationUtils.saveLocation(lobby);
+        }
+        Integer waitRoomID = LocationUtils.getLocationID(waitRoom);
+        if (waitRoomID == null) {
+            waitRoomID = LocationUtils.saveLocation(waitRoom);
+        }
+        Integer areaP1ID = LocationUtils.getLocationID(areaP1);
+        if (areaP1ID == null) {
+            areaP1ID = LocationUtils.saveLocation(areaP1);
+        }
+        Integer areaP2ID = LocationUtils.getLocationID(areaP2);
+        if (areaP2ID == null) {
+            areaP2ID = LocationUtils.saveLocation(areaP2);
+        }
+        Integer startPtID = LocationUtils.getLocationID(startPoint);
+        if (startPtID == null) {
+            startPtID = LocationUtils.saveLocation(startPoint);
+        }
+        final PreparedStatement upStmt = Database.getConn().prepareStatement(
+                "UPDATE `fungeons` SET `lobby_loc_id` = ?, `wait_rm_loc_id` = ?,"
+                        + "`area_p1_loc_id` = ?, `area_p2_loc_id` = ?, `start_pt_loc_id` = ? WHERE `row_id` = ?");
+        upStmt.setInt(1, lobbyID);
+        upStmt.setInt(2, waitRoomID);
+        upStmt.setInt(3, areaP1ID);
+        upStmt.setInt(4, areaP2ID);
+        upStmt.setInt(5, startPtID);
+        upStmt.setInt(6, id);
+        upStmt.execute();
+        upStmt.close();
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public Validity setEnabled(boolean enabled) {
+        this.enabled = enabled;
+        return Validity.VALID;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public Validity setName(String name) {
+        if (name.equalsIgnoreCase("")) {
+            return Validity.FUNGEON_NAME_IS_EMPTY;
+        }
+        this.name = name;
         return Validity.VALID;
     }
 
