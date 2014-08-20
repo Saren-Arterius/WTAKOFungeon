@@ -21,7 +21,7 @@ public class CommandWFun implements CommandExecutor {
 
     public boolean callCommand(CommandSender sender, String[] args, String targetCommandName) {
         try {
-            final Commands targetCommand = Commands.valueOf(targetCommandName.toUpperCase());
+            final Commands targetCommand = Commands.valueOf(targetCommandName.toUpperCase().replace("-", "_"));
             if (!sender.hasPermission(targetCommand.getRequiredPermission())) {
                 sender.sendMessage(Lang.NO_PERMISSION_COMMAND.toString());
                 return true;

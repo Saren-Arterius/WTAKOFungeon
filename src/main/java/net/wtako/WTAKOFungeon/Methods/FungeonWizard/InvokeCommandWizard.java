@@ -1,4 +1,4 @@
-package net.wtako.WTAKOFungeon.Methods.SetWizard;
+package net.wtako.WTAKOFungeon.Methods.FungeonWizard;
 
 import java.sql.SQLException;
 import java.text.MessageFormat;
@@ -9,16 +9,17 @@ import net.wtako.WTAKOFungeon.Utils.Lang;
 
 import org.bukkit.entity.Player;
 
-public class NameWizard extends BaseWizard {
+public class InvokeCommandWizard extends BaseWizard {
 
-    public NameWizard(Player player, Fungeon fungeon) {
+    public InvokeCommandWizard(Player player, Fungeon fungeon) {
         super(player, fungeon);
-        player.sendMessage(MessageFormat.format(Lang.TYPE_SOMETHING_TO_CONTINUE.toString(), "My_fungeon"));
+        player.sendMessage(MessageFormat.format(Lang.TYPE_SOMETHING_TO_CONTINUE.toString(),
+                "mm mobs spawn danger_boss 1 rpg_world,1000,70,-1000"));
     }
 
     @Override
     public Validity setValue(Object value) throws SQLException {
-        final Validity result = fungeon.setName((String) value);
+        final Validity result = fungeon.setInvokeCommand((String) value);
         if (result == Validity.VALID) {
             fungeon.save();
         }

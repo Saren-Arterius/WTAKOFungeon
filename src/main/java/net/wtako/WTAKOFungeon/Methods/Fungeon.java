@@ -385,6 +385,16 @@ public class Fungeon {
         upStmt.close();
     }
 
+    public Validity setWaitRoom(Location location) {
+        waitRoom = location;
+        return Validity.VALID;
+    }
+
+    public Validity setLobby(Location location) {
+        lobby = location;
+        return Validity.VALID;
+    }
+
     public Validity setAreaStartPoint(Location p1, Location p2, Location startPt) {
         if (!Fungeon.isInRegion(p1, p2, startPt)) {
             return Validity.START_POINT_NOT_IN_AREA;

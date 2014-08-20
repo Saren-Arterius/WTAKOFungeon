@@ -6,6 +6,7 @@ import net.wtako.WTAKOFungeon.Main;
 import net.wtako.WTAKOFungeon.Commands.WFun.Fungeon.ArgAdd;
 import net.wtako.WTAKOFungeon.Commands.WFun.Fungeon.ArgDel;
 import net.wtako.WTAKOFungeon.Commands.WFun.Fungeon.ArgList;
+import net.wtako.WTAKOFungeon.Commands.WFun.Fungeon.ArgListConfigs;
 import net.wtako.WTAKOFungeon.Commands.WFun.Fungeon.ArgSet;
 import net.wtako.WTAKOFungeon.Utils.BaseCommands;
 import net.wtako.WTAKOFungeon.Utils.Commands;
@@ -18,6 +19,8 @@ public class SubArgFungeon {
     public enum SubCommands implements BaseCommands {
         MAIN_COMMAND(Lang.HELP_FUNGEON.toString(), SubArgFungeon.class, Main.artifactId + ".use"),
         LIST(Lang.HELP_FUNGEON_LIST.toString(), ArgList.class, Main.artifactId + ".use"),
+        LIST_CONFIGS(Lang.HELP_FUNGEON_LIST_CONFIGS.toString(), ArgListConfigs.class, Main.artifactId + ".admin"),
+        LC(Lang.HELP_FUNGEON_LIST_CONFIGS.toString(), ArgListConfigs.class, Main.artifactId + ".admin"),
         ADD(Lang.HELP_FUNGEON_ADD.toString(), ArgAdd.class, Main.artifactId + ".admin"),
         DEL(Lang.HELP_FUNGEON_DEL.toString(), ArgDel.class, Main.artifactId + ".admin"),
         SET(Lang.HELP_FUNGEON_SET.toString(), ArgSet.class, Main.artifactId + ".admin");
@@ -55,7 +58,7 @@ public class SubArgFungeon {
 
     public boolean callCommand(CommandSender sender, String[] args, String targetCommandName) {
         try {
-            final SubCommands targetCommand = SubCommands.valueOf(targetCommandName.toUpperCase());
+            final SubCommands targetCommand = SubCommands.valueOf(targetCommandName.toUpperCase().replace("-", "_"));
             if (targetCommand == SubCommands.MAIN_COMMAND) {
                 return false;
             }

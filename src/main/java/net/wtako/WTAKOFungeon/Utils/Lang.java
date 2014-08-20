@@ -48,6 +48,8 @@ public enum Lang {
     HELP_FUNGEON_SET("Type &b/" + Main.getInstance().getProperty("mainCommand")
             + " &a{0} &a<fungeon ID>&f to set config of a fungeon."),
     HELP_FUNGEON_LIST("Type &b/" + Main.getInstance().getProperty("mainCommand") + " &a{0}&f to view all fungeons."),
+    HELP_FUNGEON_LIST_CONFIGS("Type &b/" + Main.getInstance().getProperty("mainCommand")
+            + " &a{0}&f to view all config values of a fungeon."),
     NO_PERMISSION_HELP("(&cno permission&f)"),
     PLUGIN_RELOADED("&aPlugin reloaded."),
     NO_PERMISSION_COMMAND("&cYou are not allowed to use this command."),

@@ -7,13 +7,15 @@ import java.util.HashMap;
 
 import net.wtako.WTAKOFungeon.Methods.Fungeon;
 import net.wtako.WTAKOFungeon.Methods.Fungeon.Validity;
-import net.wtako.WTAKOFungeon.Methods.SetWizard.AreaStartWizard;
-import net.wtako.WTAKOFungeon.Methods.SetWizard.BaseWizard;
-import net.wtako.WTAKOFungeon.Methods.SetWizard.EnabledWizard;
-import net.wtako.WTAKOFungeon.Methods.SetWizard.InvokeCommandWizard;
-import net.wtako.WTAKOFungeon.Methods.SetWizard.MinMaxPlayersWizard;
-import net.wtako.WTAKOFungeon.Methods.SetWizard.NameWizard;
-import net.wtako.WTAKOFungeon.Methods.SetWizard.TimeLimitsWizard;
+import net.wtako.WTAKOFungeon.Methods.FungeonWizard.AreaStartWizard;
+import net.wtako.WTAKOFungeon.Methods.FungeonWizard.BaseWizard;
+import net.wtako.WTAKOFungeon.Methods.FungeonWizard.EnabledWizard;
+import net.wtako.WTAKOFungeon.Methods.FungeonWizard.InvokeCommandWizard;
+import net.wtako.WTAKOFungeon.Methods.FungeonWizard.LobbyWizard;
+import net.wtako.WTAKOFungeon.Methods.FungeonWizard.MinMaxPlayersWizard;
+import net.wtako.WTAKOFungeon.Methods.FungeonWizard.NameWizard;
+import net.wtako.WTAKOFungeon.Methods.FungeonWizard.TimeLimitsWizard;
+import net.wtako.WTAKOFungeon.Methods.FungeonWizard.WaitRoomWizard;
 import net.wtako.WTAKOFungeon.Utils.Lang;
 
 import org.bukkit.entity.Player;
@@ -34,6 +36,8 @@ public class FungeonWizardListener implements Listener {
 
     public enum FungeonConfig {
         AREA_START(WizardType.BLOCK_BREAK, AreaStartWizard.class),
+        LOBBY(WizardType.BLOCK_BREAK, LobbyWizard.class),
+        WAIT_ROOM(WizardType.BLOCK_BREAK, WaitRoomWizard.class),
         NAME(WizardType.INPUT, NameWizard.class),
         ENABLED(WizardType.INPUT, EnabledWizard.class),
         TIME_LIMITS(WizardType.INPUT, TimeLimitsWizard.class),

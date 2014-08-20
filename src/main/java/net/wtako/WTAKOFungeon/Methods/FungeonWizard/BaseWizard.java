@@ -1,4 +1,4 @@
-package net.wtako.WTAKOFungeon.Methods.SetWizard;
+package net.wtako.WTAKOFungeon.Methods.FungeonWizard;
 
 import java.sql.SQLException;
 import java.text.MessageFormat;

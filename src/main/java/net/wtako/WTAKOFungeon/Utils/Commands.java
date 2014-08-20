@@ -77,7 +77,7 @@ public enum Commands implements BaseCommands {
                     boolean hasHelpMessage = false;
                     for (final Entry<String, ArrayList<String>> entry: commandHelps.entrySet()) {
                         if (entry.getKey().equalsIgnoreCase(command.getHelpMessage())) {
-                            entry.getValue().add(command.name().toLowerCase());
+                            entry.getValue().add(command.name().toLowerCase().replace("_", "-"));
                             hasHelpMessage = true;
                             break;
                         }
