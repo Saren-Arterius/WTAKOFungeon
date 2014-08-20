@@ -38,10 +38,8 @@ public class Database {
                 + "`enabled` INT NOT NULL, `fungeon_name` TEXT NOT NULL, " + "`time_limit` INT NOT NULL,"
                 + "`min_players` INT NOT NULL," + "`max_players` INT NOT NULL," + "`wait_time` INT NOT NULL,"
                 + "`lobby_loc_id` INT NULL," + "`area_p1_loc_id` INT NULL," + "`area_p2_loc_id` INT NULL,"
-                + "`wait_rm_loc_id` INT NULL," + "`start_pt_loc_id` INT NULL," + "`run_command` TEXT NULL" + ")";
-        cur.execute(stmt);
-        stmt = "CREATE TABLE `fungeon_signs` (" + "`row_id` INTEGER PRIMARY KEY AUTOINCREMENT, "
-                + "`fungeon_id` INT NOT NULL," + "`loc_id` INT NOT NULL" + ")";
+                + "`wait_rm_loc_id` INT NULL," + "`start_pt_loc_id` INT NULL," + "`sign_loc_id` INT NULL,"
+                + "`run_command` TEXT NULL" + ")";
         cur.execute(stmt);
         stmt = "CREATE TABLE `prizes` (" + "`row_id` INTEGER PRIMARY KEY AUTOINCREMENT, "
                 + "`fungeon_id` INT NOT NULL," + "`cash_amount` INT NULL," + "`item_json` TEXT NULL" + ")";

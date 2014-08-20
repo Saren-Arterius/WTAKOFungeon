@@ -11,7 +11,7 @@ public class ArgListConfigs {
 
     public ArgListConfigs(CommandSender sender, String[] args) {
         if (args.length < 3) {
-            sender.sendMessage(MessageFormat.format(Lang.HELP_FUNGEON_DEL.toString(),
+            sender.sendMessage(MessageFormat.format(Lang.HELP_FUNGEON_LIST_CONFIGS.toString(),
                     Commands.joinArgsInUse(args, args.length)));
             return;
         }
@@ -19,7 +19,7 @@ public class ArgListConfigs {
         try {
             fungeonID = Integer.parseInt(args[2]);
         } catch (final NumberFormatException e) {
-            sender.sendMessage(MessageFormat.format(Lang.HELP_FUNGEON_DEL.toString(),
+            sender.sendMessage(MessageFormat.format(Lang.HELP_FUNGEON_LIST_CONFIGS.toString(),
                     Commands.joinArgsInUse(args, args.length)));
             return;
         }

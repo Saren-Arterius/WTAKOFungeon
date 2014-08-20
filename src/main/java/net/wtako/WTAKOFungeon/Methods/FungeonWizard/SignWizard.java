@@ -9,9 +9,9 @@ import net.wtako.WTAKOFungeon.Utils.Lang;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
-public class WaitRoomWizard extends BaseWizard {
+public class SignWizard extends BaseWizard {
 
-    public WaitRoomWizard(Player player, Fungeon fungeon) {
+    public SignWizard(Player player, Fungeon fungeon) {
         super(player, fungeon);
         player.sendMessage(Lang.BREAK_SOME_BLOCKS_TO_CONTINUE.toString());
     }
@@ -19,7 +19,7 @@ public class WaitRoomWizard extends BaseWizard {
     @Override
     public Validity setValue(Object value) throws SQLException {
         final Location location = (Location) value;
-        final Validity result = fungeon.setWaitRoom(location);
+        final Validity result = fungeon.setSignLocation(location);
         if (result == Validity.VALID) {
             fungeon.saveLocations();
         }

@@ -10,9 +10,10 @@ import java.util.logging.Logger;
 import net.milkbowl.vault.economy.Economy;
 import net.wtako.WTAKOFungeon.Commands.CommandWFun;
 import net.wtako.WTAKOFungeon.EventHandlers.FungeonWizardListener;
-import net.wtako.WTAKOFungeon.EventHandlers.TestListener;
 import net.wtako.WTAKOFungeon.Methods.Database;
 import net.wtako.WTAKOFungeon.Methods.Fungeon;
+import net.wtako.WTAKOFungeon.Schedulers.FungeonScheduler;
+import net.wtako.WTAKOFungeon.Schedulers.SignUpdateScheduler;
 import net.wtako.WTAKOFungeon.Utils.Config;
 import net.wtako.WTAKOFungeon.Utils.Lang;
 
@@ -43,7 +44,12 @@ public final class Main extends JavaPlugin {
                 e.printStackTrace();
             }
         }
-        getServer().getPluginManager().registerEvents(new TestListener(), this);
+        if (FungeonScheduler.getInstance() == null) {
+            new FungeonScheduler();
+        }
+        if (SignUpdateScheduler.getInstance() == null) {
+            new SignUpdateScheduler();
+        }
         getServer().getPluginManager().registerEvents(new FungeonWizardListener(), this);
     }
 
@@ -51,7 +57,6 @@ public final class Main extends JavaPlugin {
     public void onDisable() {
         try {
             Database.getConn().close();
-            Fungeon.getValidFungeons().clear();
             for (final Fungeon fungeon: Fungeon.getAllFungeons().values()) {
                 fungeon.forceReset();
             }

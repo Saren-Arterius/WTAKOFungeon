@@ -14,6 +14,7 @@ import net.wtako.WTAKOFungeon.Methods.FungeonWizard.InvokeCommandWizard;
 import net.wtako.WTAKOFungeon.Methods.FungeonWizard.LobbyWizard;
 import net.wtako.WTAKOFungeon.Methods.FungeonWizard.MinMaxPlayersWizard;
 import net.wtako.WTAKOFungeon.Methods.FungeonWizard.NameWizard;
+import net.wtako.WTAKOFungeon.Methods.FungeonWizard.SignWizard;
 import net.wtako.WTAKOFungeon.Methods.FungeonWizard.TimeLimitsWizard;
 import net.wtako.WTAKOFungeon.Methods.FungeonWizard.WaitRoomWizard;
 import net.wtako.WTAKOFungeon.Utils.Lang;
@@ -38,6 +39,7 @@ public class FungeonWizardListener implements Listener {
         AREA_START(WizardType.BLOCK_BREAK, AreaStartWizard.class),
         LOBBY(WizardType.BLOCK_BREAK, LobbyWizard.class),
         WAIT_ROOM(WizardType.BLOCK_BREAK, WaitRoomWizard.class),
+        SIGN(WizardType.BLOCK_BREAK, SignWizard.class),
         NAME(WizardType.INPUT, NameWizard.class),
         ENABLED(WizardType.INPUT, EnabledWizard.class),
         TIME_LIMITS(WizardType.INPUT, TimeLimitsWizard.class),

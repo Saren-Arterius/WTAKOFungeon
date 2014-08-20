@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map.Entry;
 
 import net.wtako.WTAKOFungeon.Main;
 import net.wtako.WTAKOFungeon.Utils.Config;
@@ -15,6 +16,8 @@ import net.wtako.WTAKOFungeon.Utils.Lang;
 import net.wtako.WTAKOFungeon.Utils.LocationUtils;
 
 import org.bukkit.Location;
+import org.bukkit.block.BlockState;
+import org.bukkit.block.Sign;
 import org.bukkit.entity.Animals;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Monster;
@@ -24,12 +27,11 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 public class Fungeon {
 
-    private static HashMap<Integer, Fungeon> validFungeons = new HashMap<Integer, Fungeon>();
-    private static HashMap<Integer, Fungeon> allFungeons   = new HashMap<Integer, Fungeon>();
-    private final ArrayList<Player>          players       = new ArrayList<Player>();
-    private boolean                          isPlaying     = false;
+    private static HashMap<Integer, Fungeon> allFungeons = new HashMap<Integer, Fungeon>();
+    private final ArrayList<Player>          players     = new ArrayList<Player>();
+    private boolean                          isPlaying   = false;
     private Integer                          id;
-    private boolean                          enabled       = true;
+    private boolean                          enabled     = true;
     private String                           name;
     private Integer                          fungeonTimeLimit;
     private Integer                          minPlayers;
@@ -40,10 +42,33 @@ public class Fungeon {
     private Location                         areaP1;
     private Location                         areaP2;
     private Location                         startPoint;
+    private Location                         signLocation;
     private String                           invokeCommand;
     private Integer                          fungeonTimer;
     private Integer                          waitRoomTimer;
     private Integer                          winTimer;
+
+    public Fungeon(String fungeonName) throws SQLException {
+        enabled = true;
+        name = fungeonName;
+        fungeonTimeLimit = Config.DEFAULT_FUNGEON_TIME_LIMIT_SECONDS.getInt();
+        minPlayers = Config.DEFAULT_MIN_PLAYERS.getInt();
+        maxPlayers = Config.DEFAULT_MAX_PLAYERS.getInt();
+        waitRoomTimeLimit = Config.DEFAULT_WAITING_ROOM_TIME.getInt();
+        final PreparedStatement insStmt = Database.getConn().prepareStatement(
+                "INSERT INTO `fungeons` (`enabled`, `fungeon_name`, "
+                        + "`time_limit`, `min_players`, `max_players`, `wait_time`) VALUES (?, ?, ?, ?, ?, ?)");
+        insStmt.setInt(1, 1);
+        insStmt.setString(2, fungeonName);
+        insStmt.setInt(3, fungeonTimeLimit);
+        insStmt.setInt(4, minPlayers);
+        insStmt.setInt(5, maxPlayers);
+        insStmt.setInt(6, waitRoomTimeLimit);
+        insStmt.execute();
+        insStmt.close();
+        id = insStmt.getGeneratedKeys().getInt(1);
+        Fungeon.allFungeons.put(id, this);
+    }
 
     public Fungeon(int fungeonID) throws SQLException {
         final PreparedStatement selStmt = Database.getConn()
@@ -67,11 +92,9 @@ public class Fungeon {
         areaP1 = LocationUtils.getLocation(result.getInt("area_p1_loc_id"));
         areaP2 = LocationUtils.getLocation(result.getInt("area_p2_loc_id"));
         startPoint = LocationUtils.getLocation(result.getInt("start_pt_loc_id"));
+        signLocation = LocationUtils.getLocation(result.getInt("sign_loc_id"));
         invokeCommand = result.getString("run_command");
         Fungeon.allFungeons.put(fungeonID, this);
-        if (checkValidity() == Validity.VALID) {
-            Fungeon.validFungeons.put(fungeonID, this);
-        }
     }
 
     public enum Validity {
@@ -85,6 +108,8 @@ public class Fungeon {
         AREA_P1_IS_NULL,
         AREA_P2_IS_NULL,
         START_POINT_IS_NULL,
+        SIGN_LOCATION_IS_NULL,
+        SIGN_LOCATION_HAS_NO_SIGN,
         INVOKE_COMMAND_IS_NULL,
         START_POINT_NOT_IN_AREA,
         PARSE_FAIL,
@@ -108,6 +133,23 @@ public class Fungeon {
         IDLE,
         WAITING_OTHER_PLAYERS,
         PLAYING,
+    }
+
+    public void updateSign() {
+        if (signLocation == null) {
+            return;
+        }
+        BlockState bs = signLocation.getBlock().getState();
+        if (!(bs instanceof Sign)) {
+            return;
+        }
+        final Sign sign = (Sign) bs;
+        sign.setLine(0, Lang.FUNGEON.toString());
+        sign.setLine(1, toString());
+        sign.setLine(2, getStatus().name());
+        sign.setLine(3,
+                MessageFormat.format(Lang.FUNGEON_PLAYERS_FORMAT.toString(), getPlayers().size(), getMaxPlayers()));
+        sign.update();
     }
 
     public void checkWaitingRoom() {
@@ -324,6 +366,12 @@ public class Fungeon {
         if (startPoint == null) {
             return Validity.START_POINT_IS_NULL;
         }
+        if (signLocation == null) {
+            return Validity.SIGN_LOCATION_IS_NULL;
+        }
+        if (!(signLocation.getBlock().getState() instanceof Sign)) {
+            return Validity.SIGN_LOCATION_HAS_NO_SIGN;
+        }
         if (minPlayers > maxPlayers) {
             return Validity.MAX_PLAYERS_IS_LESSER_THAN_MIN_PLAYERS;
         }
@@ -336,53 +384,91 @@ public class Fungeon {
         return Validity.VALID;
     }
 
-    public void save() throws SQLException {
-        final PreparedStatement upStmt = Database.getConn().prepareStatement(
-                "UPDATE `fungeons` SET `fungeon_name` = ?, `time_limit` = ?, `min_players` = ?,"
-                        + "`max_players` = ?, `wait_time` = ?, `run_command` = ? WHERE `row_id` = ?");
-        upStmt.setString(1, name);
-        upStmt.setInt(2, fungeonTimeLimit);
-        upStmt.setInt(3, minPlayers);
-        upStmt.setInt(4, maxPlayers);
-        upStmt.setInt(5, waitRoomTimeLimit);
-        upStmt.setString(6, invokeCommand);
-        upStmt.setInt(7, id);
-        upStmt.execute();
-        upStmt.close();
+    public void save() {
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                try {
+                    final PreparedStatement upStmt = Database.getConn().prepareStatement(
+                            "UPDATE `fungeons` SET `fungeon_name` = ?, `time_limit` = ?, "
+                                    + "`min_players` = ?, `max_players` = ?, `wait_time` = ?, "
+                                    + "`run_command` = ?, `enabled` = ? WHERE `row_id` = ?");
+                    upStmt.setString(1, name);
+                    upStmt.setInt(2, fungeonTimeLimit);
+                    upStmt.setInt(3, minPlayers);
+                    upStmt.setInt(4, maxPlayers);
+                    upStmt.setInt(5, waitRoomTimeLimit);
+                    upStmt.setString(6, invokeCommand);
+                    upStmt.setInt(7, enabled ? 1 : 0);
+                    upStmt.setInt(8, id);
+                    upStmt.execute();
+                    upStmt.close();
+                } catch (final SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }.runTaskAsynchronously(Main.getInstance());
     }
 
-    public void saveLocations() throws SQLException {
-        Integer lobbyID = LocationUtils.getLocationID(lobby);
-        if (lobbyID == null) {
-            lobbyID = LocationUtils.saveLocation(lobby);
+    public void saveLocations() {
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                try {
+                    Integer lobbyID = LocationUtils.getLocationID(lobby);
+                    if (lobbyID == null) {
+                        lobbyID = LocationUtils.saveLocation(lobby);
+                    }
+                    Integer waitRoomID = LocationUtils.getLocationID(waitRoom);
+                    if (waitRoomID == null) {
+                        waitRoomID = LocationUtils.saveLocation(waitRoom);
+                    }
+                    Integer areaP1ID = LocationUtils.getLocationID(areaP1);
+                    if (areaP1ID == null) {
+                        areaP1ID = LocationUtils.saveLocation(areaP1);
+                    }
+                    Integer areaP2ID = LocationUtils.getLocationID(areaP2);
+                    if (areaP2ID == null) {
+                        areaP2ID = LocationUtils.saveLocation(areaP2);
+                    }
+                    Integer startPtID = LocationUtils.getLocationID(startPoint);
+                    if (startPtID == null) {
+                        startPtID = LocationUtils.saveLocation(startPoint);
+                    }
+                    Integer signLocID = LocationUtils.getLocationID(signLocation);
+                    if (signLocID == null) {
+                        signLocID = LocationUtils.saveLocation(signLocation);
+                    }
+                    final PreparedStatement upStmt = Database
+                            .getConn()
+                            .prepareStatement(
+                                    "UPDATE `fungeons` SET `lobby_loc_id` = ?, `wait_rm_loc_id` = ?, `area_p1_loc_id` = ?, "
+                                            + "`area_p2_loc_id` = ?, `start_pt_loc_id` = ?, `sign_loc_id` = ? WHERE `row_id` = ?");
+                    upStmt.setInt(1, lobbyID);
+                    upStmt.setInt(2, waitRoomID);
+                    upStmt.setInt(3, areaP1ID);
+                    upStmt.setInt(4, areaP2ID);
+                    upStmt.setInt(5, startPtID);
+                    upStmt.setInt(6, signLocID);
+                    upStmt.setInt(7, id);
+                    upStmt.execute();
+                    upStmt.close();
+                } catch (final SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }.runTaskAsynchronously(Main.getInstance());
+    }
+
+    public Validity setSignLocation(Location location) {
+        if (location == null) {
+            return Validity.SIGN_LOCATION_IS_NULL;
         }
-        Integer waitRoomID = LocationUtils.getLocationID(waitRoom);
-        if (waitRoomID == null) {
-            waitRoomID = LocationUtils.saveLocation(waitRoom);
+        if (!(location.getBlock().getState() instanceof Sign)) {
+            return Validity.SIGN_LOCATION_HAS_NO_SIGN;
         }
-        Integer areaP1ID = LocationUtils.getLocationID(areaP1);
-        if (areaP1ID == null) {
-            areaP1ID = LocationUtils.saveLocation(areaP1);
-        }
-        Integer areaP2ID = LocationUtils.getLocationID(areaP2);
-        if (areaP2ID == null) {
-            areaP2ID = LocationUtils.saveLocation(areaP2);
-        }
-        Integer startPtID = LocationUtils.getLocationID(startPoint);
-        if (startPtID == null) {
-            startPtID = LocationUtils.saveLocation(startPoint);
-        }
-        final PreparedStatement upStmt = Database.getConn().prepareStatement(
-                "UPDATE `fungeons` SET `lobby_loc_id` = ?, `wait_rm_loc_id` = ?,"
-                        + "`area_p1_loc_id` = ?, `area_p2_loc_id` = ?, `start_pt_loc_id` = ? WHERE `row_id` = ?");
-        upStmt.setInt(1, lobbyID);
-        upStmt.setInt(2, waitRoomID);
-        upStmt.setInt(3, areaP1ID);
-        upStmt.setInt(4, areaP2ID);
-        upStmt.setInt(5, startPtID);
-        upStmt.setInt(6, id);
-        upStmt.execute();
-        upStmt.close();
+        signLocation = location;
+        return Validity.VALID;
     }
 
     public Validity setWaitRoom(Location location) {
@@ -462,6 +548,10 @@ public class Fungeon {
         return Validity.VALID;
     }
 
+    public int getID() {
+        return id;
+    }
+
     public String getName() {
         return name;
     }
@@ -488,7 +578,13 @@ public class Fungeon {
     }
 
     public static HashMap<Integer, Fungeon> getValidFungeons() {
-        return Fungeon.validFungeons;
+        final HashMap<Integer, Fungeon> validFungeons = new HashMap<Integer, Fungeon>();
+        for (final Entry<Integer, Fungeon> entry: Fungeon.getAllFungeons().entrySet()) {
+            if (entry.getValue().checkValidity() == Validity.VALID) {
+                validFungeons.put(entry.getKey(), entry.getValue());
+            }
+        }
+        return validFungeons;
     }
 
     public static HashMap<Integer, Fungeon> getAllFungeons() {

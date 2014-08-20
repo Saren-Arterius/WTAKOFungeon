@@ -8,7 +8,6 @@ import java.util.Map.Entry;
 import net.wtako.WTAKOFungeon.Main;
 import net.wtako.WTAKOFungeon.Commands.WFun.ArgHelp;
 import net.wtako.WTAKOFungeon.Commands.WFun.ArgReload;
-import net.wtako.WTAKOFungeon.Commands.WFun.ArgTest;
 import net.wtako.WTAKOFungeon.Commands.WFun.SubArgFungeon;
 
 import org.bukkit.command.CommandSender;
@@ -19,7 +18,6 @@ public enum Commands implements BaseCommands {
     MAIN_COMMAND(Lang.HELP_HELP.toString(), ArgHelp.class, Main.artifactId + ".use"),
     H(Lang.HELP_HELP.toString(), ArgHelp.class, Main.artifactId + ".use"),
     HELP(Lang.HELP_HELP.toString(), ArgHelp.class, Main.artifactId + ".use"),
-    TEST(Lang.HELP_TEST.toString(), ArgTest.class, Main.artifactId + ".admin"),
     FUNGEON(Lang.HELP_FUNGEON.toString(), SubArgFungeon.class, Main.artifactId + ".admin"),
     F(Lang.HELP_FUNGEON.toString(), SubArgFungeon.class, Main.artifactId + ".admin"),
     RELOAD(Lang.HELP_RELOAD.toString(), ArgReload.class, Main.artifactId + ".reload");
@@ -84,7 +82,7 @@ public enum Commands implements BaseCommands {
                     }
                     if (!hasHelpMessage) {
                         final ArrayList<String> commandList = new ArrayList<String>();
-                        commandList.add(command.name().toLowerCase());
+                        commandList.add(command.name().toLowerCase().replace("_", "-"));
                         commandHelps.put(command.getHelpMessage(), commandList);
                     }
                 }

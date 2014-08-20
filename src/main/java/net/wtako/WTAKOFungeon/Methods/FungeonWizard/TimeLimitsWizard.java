@@ -25,26 +25,24 @@ public class TimeLimitsWizard extends BaseWizard {
         try {
             final int val = Integer.parseInt((String) value);
             if (fungeonTimeLimit == null) {
-                if (val <= 60) {
-                    return Validity.DEFAULT_VALUE_FAIL;
-                }
                 fungeonTimeLimit = val;
                 sendMessage();
                 return Validity.PENDING;
             }
             if (waitRoomTimeLimit == null) {
-                if (val <= 0) {
-                    return Validity.DEFAULT_VALUE_FAIL;
-                }
                 waitRoomTimeLimit = val;
                 sendMessage();
             }
             Validity result = fungeon.setFungeonTimeLimit(fungeonTimeLimit);
             if (result != Validity.VALID) {
+                fungeonTimeLimit = null;
+                sendMessage();
                 return result;
             }
             result = fungeon.setWaitRoomTimeLimit(waitRoomTimeLimit);
             if (result != Validity.VALID) {
+                waitRoomTimeLimit = null;
+                sendMessage();
                 return result;
             }
             fungeon.save();

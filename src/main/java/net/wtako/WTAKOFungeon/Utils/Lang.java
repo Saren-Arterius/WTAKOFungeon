@@ -39,7 +39,6 @@ public enum Lang {
     CONFIG_SET_FAIL("&cFailed to set config. Please try again. ({0}: {1}) - {2}"),
     HELP_HELP("Type &b/" + Main.getInstance().getProperty("mainCommand") + " &a{0}&f to show help (this message). {1}"),
     HELP_RELOAD("Type &b/" + Main.getInstance().getProperty("mainCommand") + " &a{0}&f to reload the plugin. {1}"),
-    HELP_TEST("Type &b/" + Main.getInstance().getProperty("mainCommand") + " &a{0}&f to perform tests."),
     HELP_FUNGEON("Type &b/" + Main.getInstance().getProperty("mainCommand") + " &a{0}&f to manage fungeons."),
     HELP_FUNGEON_ADD("Type &b/" + Main.getInstance().getProperty("mainCommand")
             + " &a{0} &a<fungeon name>&f to add a new fungeon."),

@@ -2,14 +2,12 @@ package net.wtako.WTAKOFungeon.Methods.FungeonWizard;
 
 import java.sql.SQLException;
 
-import net.wtako.WTAKOFungeon.Main;
 import net.wtako.WTAKOFungeon.Methods.Fungeon;
 import net.wtako.WTAKOFungeon.Methods.Fungeon.Validity;
 import net.wtako.WTAKOFungeon.Utils.Lang;
 
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitRunnable;
 
 public class AreaStartWizard extends BaseWizard {
 
@@ -35,22 +33,13 @@ public class AreaStartWizard extends BaseWizard {
             sendMessage();
             return Validity.PENDING;
         }
-        if (!Fungeon.isInRegion(areaP1, areaP2, location)) {
-            return Validity.START_POINT_NOT_IN_AREA;
-        }
         final Validity result = fungeon.setAreaStartPoint(areaP1, areaP2, location);
         if (result == Validity.VALID) {
-            new BukkitRunnable() {
-                @Override
-                public void run() {
-                    try {
-                        fungeon.saveLocations();
-                    } catch (final SQLException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }.runTaskAsynchronously(Main.getInstance());
-
+            fungeon.saveLocations();
+        } else {
+            areaP1 = null;
+            areaP2 = null;
+            sendMessage();
         }
         return result;
     }
