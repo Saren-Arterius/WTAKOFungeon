@@ -9,6 +9,7 @@ import net.wtako.WTAKOFungeon.Main;
 import net.wtako.WTAKOFungeon.Commands.WFun.ArgHelp;
 import net.wtako.WTAKOFungeon.Commands.WFun.ArgReload;
 import net.wtako.WTAKOFungeon.Commands.WFun.SubArgFungeon;
+import net.wtako.WTAKOFungeon.Commands.WFun.SubArgPrize;
 
 import org.bukkit.command.CommandSender;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -18,8 +19,10 @@ public enum Commands implements BaseCommands {
     MAIN_COMMAND(Lang.HELP_HELP.toString(), ArgHelp.class, Main.artifactId + ".use"),
     H(Lang.HELP_HELP.toString(), ArgHelp.class, Main.artifactId + ".use"),
     HELP(Lang.HELP_HELP.toString(), ArgHelp.class, Main.artifactId + ".use"),
-    FUNGEON(Lang.HELP_FUNGEON.toString(), SubArgFungeon.class, Main.artifactId + ".admin"),
-    F(Lang.HELP_FUNGEON.toString(), SubArgFungeon.class, Main.artifactId + ".admin"),
+    FUNGEON(Lang.HELP_FUNGEON.toString(), SubArgFungeon.class, Main.artifactId + ".use"),
+    F(Lang.HELP_FUNGEON.toString(), SubArgFungeon.class, Main.artifactId + ".use"),
+    PRIZE(Lang.HELP_PRIZE.toString(), SubArgPrize.class, Main.artifactId + ".use"),
+    P(Lang.HELP_PRIZE.toString(), SubArgPrize.class, Main.artifactId + ".use"),
     RELOAD(Lang.HELP_RELOAD.toString(), ArgReload.class, Main.artifactId + ".reload");
 
     private String   helpMessage;
@@ -42,6 +45,7 @@ public enum Commands implements BaseCommands {
         return targetClass;
     }
 
+    @Override
     public String getRequiredPermission() {
         return permission;
     }
@@ -97,7 +101,7 @@ public enum Commands implements BaseCommands {
                         }
                     }
                     String permissionString = "";
-                    for (final Commands command: Commands.values()) {
+                    for (final BaseCommands command: commandValues) {
                         if (command.getHelpMessage().equalsIgnoreCase(entry.getKey())
                                 && !sender.hasPermission(command.getRequiredPermission())) {
                             permissionString = Lang.NO_PERMISSION_HELP.toString();

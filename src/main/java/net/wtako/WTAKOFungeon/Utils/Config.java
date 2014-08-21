@@ -7,13 +7,11 @@ import net.wtako.WTAKOFungeon.Main;
 import org.bukkit.configuration.file.FileConfiguration;
 
 public enum Config {
-    DEFAULT_FUNGEON_TIME_LIMIT_SECONDS("fungeon.default.fungeon-time-limit-seconds", 1800),
+    DEFAULT_FUNGEON_TIME_LIMIT_SECONDS("fungeon.default.fungeon-time-limit-seconds", 900),
     DEFAULT_MIN_PLAYERS("fungeon.default.min-players", 3),
     DEFAULT_MAX_PLAYERS("fungeon.default.max-players", 8),
-    DEFAULT_WAITING_ROOM_TIME("fungeon.default.waiting-room-time", 60),
-    NO_ENEMIES_WIN_TIMER("fungeon.win-timer", 10),
-    INVOKE_COMMAND_DELAY_SECONDS("fungeon.invoke-command-delay-seconds", 5),
-    SIGNS_UPDATE_INTERVAL("task.signs-update-interval-ticks", 20),
+    DEFAULT_WAITING_ROOM_TIME("fungeon.default.waiting-room-time", 30),
+    NO_ENEMIES_WAVE_INTERVAL("fungeon.no-enemies-wave-interval", 5),
     PLUGIN_ENABLED("system.plugin-enabled", true);
 
     private String path;

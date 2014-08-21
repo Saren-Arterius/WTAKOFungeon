@@ -1,5 +1,6 @@
 package net.wtako.WTAKOFungeon.Utils;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -36,6 +37,12 @@ public class ItemStackUtils {
         keepAndDropItemStacks.add(keepItems);
         keepAndDropItemStacks.add(tempItemStacks);
         return keepAndDropItemStacks;
+    }
+
+    public static String toHumanReadable(ItemStack stack) {
+        return MessageFormat.format(Lang.ITEM_PRINT_FORMAT.toString(), stack.getAmount(), stack.hasItemMeta()
+                && !stack.getItemMeta().getDisplayName().equalsIgnoreCase("") ? stack.getItemMeta().getDisplayName()
+                : stack.getType().name());
     }
 
     public static void giveToPlayerOrDrop(ItemStack itemStack, Player player, Location location) {

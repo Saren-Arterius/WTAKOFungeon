@@ -3,27 +3,26 @@ package net.wtako.WTAKOFungeon.Commands.WFun;
 import java.lang.reflect.InvocationTargetException;
 
 import net.wtako.WTAKOFungeon.Main;
-import net.wtako.WTAKOFungeon.Commands.WFun.Fungeon.ArgAdd;
-import net.wtako.WTAKOFungeon.Commands.WFun.Fungeon.ArgDel;
-import net.wtako.WTAKOFungeon.Commands.WFun.Fungeon.ArgList;
-import net.wtako.WTAKOFungeon.Commands.WFun.Fungeon.ArgListConfigs;
-import net.wtako.WTAKOFungeon.Commands.WFun.Fungeon.ArgSet;
+import net.wtako.WTAKOFungeon.Commands.WFun.Prize.ArgAdd;
+import net.wtako.WTAKOFungeon.Commands.WFun.Prize.ArgClear;
+import net.wtako.WTAKOFungeon.Commands.WFun.Prize.ArgDel;
+import net.wtako.WTAKOFungeon.Commands.WFun.Prize.ArgGet;
+import net.wtako.WTAKOFungeon.Commands.WFun.Prize.ArgList;
 import net.wtako.WTAKOFungeon.Utils.BaseCommands;
 import net.wtako.WTAKOFungeon.Utils.Commands;
 import net.wtako.WTAKOFungeon.Utils.Lang;
 
 import org.bukkit.command.CommandSender;
 
-public class SubArgFungeon {
+public class SubArgPrize {
 
     public enum SubCommands implements BaseCommands {
-        MAIN_COMMAND(Lang.HELP_FUNGEON.toString(), SubArgFungeon.class, Main.artifactId + ".use"),
-        LIST(Lang.HELP_FUNGEON_LIST.toString(), ArgList.class, Main.artifactId + ".use"),
-        LIST_CONFIGS(Lang.HELP_FUNGEON_LIST_CONFIGS.toString(), ArgListConfigs.class, Main.artifactId + ".admin"),
-        LC(Lang.HELP_FUNGEON_LIST_CONFIGS.toString(), ArgListConfigs.class, Main.artifactId + ".admin"),
-        ADD(Lang.HELP_FUNGEON_ADD.toString(), ArgAdd.class, Main.artifactId + ".admin"),
-        DEL(Lang.HELP_FUNGEON_DEL.toString(), ArgDel.class, Main.artifactId + ".admin"),
-        SET(Lang.HELP_FUNGEON_SET.toString(), ArgSet.class, Main.artifactId + ".admin");
+        MAIN_COMMAND(Lang.HELP_PRIZE.toString(), SubArgPrize.class, Main.artifactId + ".use"),
+        LIST(Lang.HELP_PRIZE_LIST.toString(), ArgList.class, Main.artifactId + ".use"),
+        DEL(Lang.HELP_PRIZE_DEL.toString(), ArgDel.class, Main.artifactId + ".admin"),
+        CLEAR(Lang.HELP_PRIZE_CLEAR.toString(), ArgClear.class, Main.artifactId + ".admin"),
+        ADD(Lang.HELP_PRIZE_ADD.toString(), ArgAdd.class, Main.artifactId + ".admin"),
+        GET(Lang.HELP_PRIZE_GET.toString(), ArgGet.class, Main.artifactId + ".admin");
 
         private String   helpMessage;
         private Class<?> targetClass;
@@ -51,7 +50,7 @@ public class SubArgFungeon {
         }
     }
 
-    public SubArgFungeon(final CommandSender sender, String[] args) {
+    public SubArgPrize(final CommandSender sender, String[] args) {
         if (args.length < 2 || !callCommand(sender, args, args[1])) {
             Commands.sendHelp(sender, SubCommands.values(), args[0]);
         }

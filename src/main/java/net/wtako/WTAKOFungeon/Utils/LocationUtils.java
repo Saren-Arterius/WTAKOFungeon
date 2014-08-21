@@ -3,6 +3,7 @@ package net.wtako.WTAKOFungeon.Utils;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.MessageFormat;
 
 import net.wtako.WTAKOFungeon.Main;
 import net.wtako.WTAKOFungeon.Methods.Database;
@@ -16,6 +17,11 @@ public class LocationUtils {
         delStmt.setInt(1, locID);
         delStmt.execute();
         delStmt.close();
+    }
+
+    public static String toHumanReadable(Location location) {
+        return MessageFormat.format(Lang.LOCATION_FORMAT.toString(), location.getWorld().getName(), location.getX(),
+                location.getY(), location.getZ());
     }
 
     public static int saveLocation(Location location) throws SQLException {

@@ -8,4 +8,6 @@ public interface BaseCommands {
 
     public Class<?> getTargetClass();
 
+    public String getRequiredPermission();
+
 }

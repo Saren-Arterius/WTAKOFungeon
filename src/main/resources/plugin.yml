@@ -7,7 +7,7 @@ website: ${url}
  
 main: ${groupId}.${artifactId}.${mainClass}
 mainCommand: ${mainCommand}
-depend: [Vault]
+depend: [Vault, BarAPI]
 
 commands:
     ${mainCommand}:
@@ -25,6 +25,9 @@ permissions:
         children:
             ${artifactId}.reload: true
         default: op
-    ${artifactId}.use:
-        description: Gives access to basic command and using scrolls.
+    ${artifactId}.reload:
+        description: Allows to reload this plugin.
         default: op
+    ${artifactId}.use:
+        description: Gives access to basic commands.
+        default: true

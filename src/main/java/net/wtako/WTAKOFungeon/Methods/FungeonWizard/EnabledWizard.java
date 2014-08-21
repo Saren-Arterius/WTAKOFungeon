@@ -29,7 +29,7 @@ public class EnabledWizard extends BaseWizard {
         }
         final Validity result = fungeon.setEnabled(enabled);
         if (result == Validity.VALID) {
-            fungeon.forceReset();
+            fungeon.forceResetAll();
             fungeon.save();
         }
         return result;

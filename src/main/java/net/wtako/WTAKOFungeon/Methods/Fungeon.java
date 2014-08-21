@@ -8,14 +8,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
+import me.confuser.barapi.BarAPI;
 import net.wtako.WTAKOFungeon.Main;
 import net.wtako.WTAKOFungeon.Utils.Config;
 import net.wtako.WTAKOFungeon.Utils.ItemStackUtils;
-import net.wtako.WTAKOFungeon.Utils.ItemUtils;
 import net.wtako.WTAKOFungeon.Utils.Lang;
 import net.wtako.WTAKOFungeon.Utils.LocationUtils;
 
 import org.bukkit.Location;
+import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Animals;
@@ -27,11 +28,11 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 public class Fungeon {
 
-    private static HashMap<Integer, Fungeon> allFungeons = new HashMap<Integer, Fungeon>();
-    private final ArrayList<Player>          players     = new ArrayList<Player>();
-    private boolean                          isPlaying   = false;
+    private static HashMap<Integer, Fungeon> allFungeons            = new HashMap<Integer, Fungeon>();
+    private final ArrayList<Player>          joinedPlayers          = new ArrayList<Player>();
+    private boolean                          isPlaying              = false;
     private Integer                          id;
-    private boolean                          enabled     = true;
+    private boolean                          enabled                = true;
     private String                           name;
     private Integer                          fungeonTimeLimit;
     private Integer                          minPlayers;
@@ -43,10 +44,12 @@ public class Fungeon {
     private Location                         areaP2;
     private Location                         startPoint;
     private Location                         signLocation;
-    private String                           invokeCommand;
     private Integer                          fungeonTimer;
     private Integer                          waitRoomTimer;
-    private Integer                          winTimer;
+    private Integer                          nextWaveTimer;
+    private Integer                          lastJoinedPlayersCount = 0;
+    private Integer                          currentWave            = 0;
+    private ArrayList<String>                waveCommands;
 
     public Fungeon(String fungeonName) throws SQLException {
         enabled = true;
@@ -93,7 +96,6 @@ public class Fungeon {
         areaP2 = LocationUtils.getLocation(result.getInt("area_p2_loc_id"));
         startPoint = LocationUtils.getLocation(result.getInt("start_pt_loc_id"));
         signLocation = LocationUtils.getLocation(result.getInt("sign_loc_id"));
-        invokeCommand = result.getString("run_command");
         Fungeon.allFungeons.put(fungeonID, this);
     }
 
@@ -125,21 +127,54 @@ public class Fungeon {
         PLAYER_ALREADY_JOINED,
         NOT_ENOUGH_PLAYERS,
         FUNGEON_NOT_VALID,
+        NOT_TEAM_LEADER,
         SUCCESS
     }
 
     public enum Status {
         FUNGEON_NOT_VALID,
         IDLE,
-        WAITING_OTHER_PLAYERS,
+        WAIT_COUNTDOWN,
         PLAYING,
+    }
+
+    public void updatePlayerBars() {
+        String msg = "";
+        float value = 100F;
+        final Status status = getStatus();
+        if (status == Status.IDLE) {
+            msg = MessageFormat.format(Lang.BAR_WAITING_ROOM_IDLE_FORMAT.toString(), toString(),
+                    MessageFormat.format(Lang.FUNGEON_PLAYERS_FORMAT.toString(), joinedPlayers.size(), minPlayers));
+        } else if (status == Status.WAIT_COUNTDOWN) {
+            value = (Float.valueOf(waitRoomTimer) / Float.valueOf(waitRoomTimeLimit)) * 100F;
+            msg = MessageFormat.format(Lang.BAR_WAITING_ROOM_COUNTDOWN_FORMAT.toString(), toString(),
+                    MessageFormat.format(Lang.FUNGEON_PLAYERS_FORMAT.toString(), joinedPlayers.size(), maxPlayers));
+        } else if (status == Status.PLAYING) {
+            if (currentWave != 0) {
+                final int enemiesCount = getEnemiesLeft().size();
+                if (enemiesCount > 0) {
+                    value = (Float.valueOf(fungeonTimer) / Float.valueOf(fungeonTimeLimit)) * 100F;
+                    msg = MessageFormat.format(Lang.BAR_FUNGEON_COUNTDOWN_FORMAT.toString(), toString(), currentWave,
+                            getEnemiesLeft().size());
+                } else {
+                    value = (Float.valueOf(nextWaveTimer) / Float.valueOf(Config.NO_ENEMIES_WAVE_INTERVAL.getInt())) * 100F;
+                    msg = MessageFormat.format(Lang.BAR_FUNGEON_WAVE_END_FORMAT.toString(), toString(), currentWave);
+                }
+            } else {
+                value = (Float.valueOf(nextWaveTimer) / Float.valueOf(Config.NO_ENEMIES_WAVE_INTERVAL.getInt())) * 100F;
+                msg = MessageFormat.format(Lang.BAR_FUNGEON_FIRST_WAVE_COMING_FORMAT.toString(), toString());
+            }
+        }
+        for (final Player joinedPlayer: joinedPlayers) {
+            BarAPI.setMessage(joinedPlayer, msg, value < 0 ? 0 : value);
+        }
     }
 
     public void updateSign() {
         if (signLocation == null) {
             return;
         }
-        BlockState bs = signLocation.getBlock().getState();
+        final BlockState bs = signLocation.getBlock().getState();
         if (!(bs instanceof Sign)) {
             return;
         }
@@ -147,67 +182,105 @@ public class Fungeon {
         sign.setLine(0, Lang.FUNGEON.toString());
         sign.setLine(1, toString());
         sign.setLine(2, getStatus().name());
-        sign.setLine(3,
-                MessageFormat.format(Lang.FUNGEON_PLAYERS_FORMAT.toString(), getPlayers().size(), getMaxPlayers()));
+        sign.setLine(3, MessageFormat.format(Lang.FUNGEON_PLAYERS_FORMAT.toString(), getJoinedPlayers().size(),
+                getMaxPlayers()));
         sign.update();
     }
 
-    public void checkWaitingRoom() {
-        if (getStatus() != Status.WAITING_OTHER_PLAYERS) {
+    public void waitingRoomTick() {
+        if (getStatus() != Status.WAIT_COUNTDOWN || joinedPlayers.size() != lastJoinedPlayersCount) {
             waitRoomTimer = waitRoomTimeLimit;
+            lastJoinedPlayersCount = joinedPlayers.size();
             return;
         }
+        lastJoinedPlayersCount = joinedPlayers.size();
         if (waitRoomTimer-- <= 0) {
             start(false);
         }
     }
 
-    public void checkFungeon() {
+    public void fungeonTick() {
         if (getStatus() != Status.PLAYING) {
+            nextWaveTimer = Config.NO_ENEMIES_WAVE_INTERVAL.getInt();
             fungeonTimer = fungeonTimeLimit;
-            winTimer = Config.NO_ENEMIES_WIN_TIMER.getInt();
             return;
         }
-        int enemiesAlive = 0;
-        for (final Entity mob: startPoint.getWorld().getEntities()) {
-            if ((mob instanceof Monster || mob instanceof Animals)
-                    && Fungeon.isInRegion(areaP1, areaP2, mob.getLocation())) {
-                enemiesAlive++;
+        if (waveCommands == null) {
+            try {
+                waveCommands = Fungeon.getCommandWaves(id);
+                return;
+            } catch (final SQLException e) {
+                for (final Player player: new ArrayList<Player>(joinedPlayers)) {
+                    player.sendMessage(Lang.DB_EXCEPTION.toString());
+                }
+                forceResetAll();
+                e.printStackTrace();
             }
         }
-        if (enemiesAlive == 0 && winTimer-- <= 0) {
-            win();
+        if (currentWave != 0 && getEnemiesLeft().size() > 0) {
+            nextWaveTimer = Config.NO_ENEMIES_WAVE_INTERVAL.getInt();
+            if (fungeonTimer-- <= 0) {
+                lose();
+            }
             return;
         }
-        winTimer = Config.NO_ENEMIES_WIN_TIMER.getInt();
-        if (fungeonTimer-- <= 0) {
-            lose();
+        if (nextWaveTimer-- <= 0) {
+            if (waveCommands.size() == 0) {
+                for (final Player player: joinedPlayers) {
+                    player.sendMessage(Lang.FUNGEON_HAS_NO_WAVES.toString());
+                }
+                lose();
+            } else if (currentWave >= waveCommands.size()) {
+                win();
+            } else {
+                for (final Entity mob: getEnemiesLeft()) {
+                    mob.remove();
+                }
+                Main.getInstance()
+                        .getServer()
+                        .dispatchCommand(Main.getInstance().getServer().getConsoleSender(),
+                                waveCommands.get(currentWave));
+                currentWave++;
+            }
         }
-
     }
 
-    public void forceReset() {
-        for (final Player player: new ArrayList<Player>(players)) {
+    public void forceResetAll() {
+        reset();
+        for (final Player player: new ArrayList<Player>(joinedPlayers)) {
             player.teleport(lobby);
+            player.sendMessage(MessageFormat.format(Lang.FORCE_LEAVE_FUNGEON.toString(), Lang.SYSTEM_WORD.toString()));
+            BarAPI.removeBar(player);
         }
-        players.clear();
+        isPlaying = false;
+        joinedPlayers.clear();
     }
 
-    public Error addPlayer(Player player) {
+    public Error joinPlayer(Player player) {
+        final Fungeon joinedFungeon = Fungeon.getJoinedFungeon(player);
+        if (joinedFungeon != null) {
+            player.sendMessage(MessageFormat.format(Lang.ALREADY_JOINED_FUNGEON.toString(), joinedFungeon.toString()));
+            return Error.PLAYER_ALREADY_JOINED;
+        }
         if (checkValidity() != Validity.VALID) {
             return Error.FUNGEON_NOT_VALID;
         }
         if (isPlaying) {
             return Error.FUNGEON_HAS_ALREADY_STARTED;
         }
-        if (players.contains(player)) {
+        if (joinedPlayers.contains(player)) {
             return Error.PLAYER_ALREADY_JOINED;
         }
-        if (players.size() >= maxPlayers) {
+        if (joinedPlayers.size() >= maxPlayers) {
             return Error.PLAYER_LIST_IS_FULL;
         }
         player.teleport(waitRoom);
-        players.add(player);
+        player.sendMessage(MessageFormat.format(Lang.FUNGEON_JOIN.toString(), toString(), minPlayers,
+                MessageFormat.format(Lang.FUNGEON_PLAYERS_FORMAT.toString(), joinedPlayers.size() + 1, maxPlayers)));
+        for (final Player joinedPlayer: joinedPlayers) {
+            joinedPlayer.sendMessage(MessageFormat.format(Lang.PLAYER_JOINED.toString(), player.getName()));
+        }
+        joinedPlayers.add(player);
         return Error.SUCCESS;
     }
 
@@ -215,11 +288,16 @@ public class Fungeon {
         if (checkValidity() != Validity.VALID) {
             return Error.FUNGEON_NOT_VALID;
         }
-        if (!players.contains(player)) {
+        if (!joinedPlayers.contains(player)) {
             return Error.PLAYER_NOT_IN_LIST;
         }
-        players.remove(player);
+        joinedPlayers.remove(player);
         player.teleport(lobby);
+        player.sendMessage(Lang.FUNGEON_LEAVE.toString());
+        BarAPI.removeBar(player);
+        for (final Player joinedPlayer: joinedPlayers) {
+            joinedPlayer.sendMessage(MessageFormat.format(Lang.PLAYER_LEFT.toString(), player.getName()));
+        }
         return Error.SUCCESS;
     }
 
@@ -230,11 +308,39 @@ public class Fungeon {
         if (isPlaying) {
             return Error.FUNGEON_HAS_ALREADY_STARTED;
         }
-        if (!players.contains(player)) {
+        if (!joinedPlayers.contains(player)) {
             return Error.PLAYER_NOT_IN_LIST;
         }
-        players.remove(player);
+        joinedPlayers.remove(player);
         player.teleport(lobby);
+        player.sendMessage(MessageFormat.format(Lang.FUNGEON_LEAVE.toString(), Lang.SYSTEM_WORD.toString()));
+        BarAPI.removeBar(player);
+        for (final Player joinedPlayer: joinedPlayers) {
+            joinedPlayer.sendMessage(MessageFormat.format(Lang.PLAYER_LEFT.toString(), player.getName()));
+        }
+        return Error.SUCCESS;
+    }
+
+    public Error kickPlayer(Player kicker, Player kickee) {
+        if (checkValidity() != Validity.VALID) {
+            return Error.FUNGEON_NOT_VALID;
+        }
+        if (joinedPlayers.get(0) != kicker) {
+            return Error.NOT_TEAM_LEADER;
+        }
+        if (isPlaying) {
+            return Error.FUNGEON_HAS_ALREADY_STARTED;
+        }
+        if (!joinedPlayers.contains(kickee)) {
+            return Error.PLAYER_NOT_IN_LIST;
+        }
+        joinedPlayers.remove(kickee);
+        kickee.teleport(lobby);
+        kickee.sendMessage(MessageFormat.format(Lang.FUNGEON_LEAVE.toString(), kicker.getName()));
+        BarAPI.removeBar(kickee);
+        for (final Player joinedPlayer: joinedPlayers) {
+            joinedPlayer.sendMessage(MessageFormat.format(Lang.PLAYER_LEFT.toString(), kickee.getName()));
+        }
         return Error.SUCCESS;
     }
 
@@ -245,7 +351,7 @@ public class Fungeon {
         if (isPlaying) {
             return Error.FUNGEON_HAS_ALREADY_STARTED;
         }
-        for (final Player player: new ArrayList<Player>(players)) {
+        for (final Player player: new ArrayList<Player>(joinedPlayers)) {
             kickPlayer(player);
         }
         return Error.SUCCESS;
@@ -258,27 +364,15 @@ public class Fungeon {
         if (getStatus() == Status.PLAYING) {
             return Error.FUNGEON_HAS_ALREADY_STARTED;
         }
-        if (!force) {
-            if (players.size() >= minPlayers) {
-                return Error.NOT_ENOUGH_PLAYERS;
-            }
+        if (!force && joinedPlayers.size() < minPlayers) {
+            return Error.NOT_ENOUGH_PLAYERS;
         }
-        for (final Player player: players) {
+        for (final Player player: joinedPlayers) {
+            player.sendMessage(Lang.FUNGEON_START.toString());
             player.teleport(startPoint);
         }
         isPlaying = true;
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                Main.getInstance().getServer()
-                        .dispatchCommand(Main.getInstance().getServer().getConsoleSender(), invokeCommand);
-            }
-        }.runTaskLater(Main.getInstance(), Config.INVOKE_COMMAND_DELAY_SECONDS.getLong() * 20L);
         return Error.SUCCESS;
-    }
-
-    public Error forceEnd() {
-        return lose();
     }
 
     private Error win() {
@@ -290,20 +384,22 @@ public class Fungeon {
             @Override
             public void run() {
                 try {
-                    final ArrayList<ItemStack> itemPrizes = Fungeon.getItemPrizes(id);
-                    final int getCashPrize = Fungeon.getCashPrize(id);
+                    final ArrayList<ItemStack> itemPrizes = Prize.getItemPrizes(id);
+                    final int cashPrize = Prize.getCashPrize(id);
                     new BukkitRunnable() {
                         @Override
                         public void run() {
-                            for (final Player player: new ArrayList<Player>(players)) {
+                            reset();
+                            for (final Player player: new ArrayList<Player>(joinedPlayers)) {
+                                player.sendMessage(Lang.YOU_WIN.toString());
                                 playerLeave(player);
                                 Fungeon.awardPlayer(player, itemPrizes);
-                                Fungeon.awardPlayer(player, getCashPrize);
+                                Fungeon.awardPlayer(player, cashPrize);
                             }
                         }
                     }.runTask(Main.getInstance());
                 } catch (final SQLException e) {
-                    for (final Player player: new ArrayList<Player>(players)) {
+                    for (final Player player: new ArrayList<Player>(joinedPlayers)) {
                         playerLeave(player);
                         player.sendMessage(Lang.DB_EXCEPTION.toString());
                     }
@@ -319,10 +415,31 @@ public class Fungeon {
             return Error.FUNGEON_HAS_NOT_STARTED;
         }
         isPlaying = false;
-        for (final Player player: new ArrayList<Player>(players)) {
+        reset();
+        for (final Player player: new ArrayList<Player>(joinedPlayers)) {
+            player.sendMessage(Lang.YOU_LOSE.toString());
             playerLeave(player);
         }
         return Error.SUCCESS;
+    }
+
+    private void reset() {
+        for (final Entity mob: getEnemiesLeft()) {
+            mob.remove();
+        }
+        waveCommands = null;
+        currentWave = 0;
+    }
+
+    public ArrayList<Entity> getEnemiesLeft() {
+        final ArrayList<Entity> enemies = new ArrayList<Entity>();
+        for (final Entity mob: startPoint.getWorld().getEntities()) {
+            if ((mob instanceof Monster || mob instanceof Animals)
+                    && Fungeon.isInRegion(areaP1, areaP2, mob.getLocation())) {
+                enemies.add(mob);
+            }
+        }
+        return enemies;
     }
 
     public Status getStatus() {
@@ -332,8 +449,8 @@ public class Fungeon {
         if (isPlaying) {
             return Status.PLAYING;
         }
-        if (players.size() >= minPlayers) {
-            return Status.WAITING_OTHER_PLAYERS;
+        if (joinedPlayers.size() >= minPlayers) {
+            return Status.WAIT_COUNTDOWN;
         }
         return Status.IDLE;
     }
@@ -344,9 +461,6 @@ public class Fungeon {
         }
         if (name.equalsIgnoreCase("")) {
             return Validity.FUNGEON_NAME_IS_EMPTY;
-        }
-        if (invokeCommand == null || invokeCommand.equalsIgnoreCase("")) {
-            return Validity.INVOKE_COMMAND_IS_NULL;
         }
         if (fungeonTimeLimit == null || fungeonTimeLimit <= 60 || waitRoomTimeLimit == null || waitRoomTimeLimit <= 0) {
             return Validity.DEFAULT_VALUE_FAIL;
@@ -392,15 +506,14 @@ public class Fungeon {
                     final PreparedStatement upStmt = Database.getConn().prepareStatement(
                             "UPDATE `fungeons` SET `fungeon_name` = ?, `time_limit` = ?, "
                                     + "`min_players` = ?, `max_players` = ?, `wait_time` = ?, "
-                                    + "`run_command` = ?, `enabled` = ? WHERE `row_id` = ?");
+                                    + "`enabled` = ? WHERE `row_id` = ?");
                     upStmt.setString(1, name);
                     upStmt.setInt(2, fungeonTimeLimit);
                     upStmt.setInt(3, minPlayers);
                     upStmt.setInt(4, maxPlayers);
                     upStmt.setInt(5, waitRoomTimeLimit);
-                    upStmt.setString(6, invokeCommand);
-                    upStmt.setInt(7, enabled ? 1 : 0);
-                    upStmt.setInt(8, id);
+                    upStmt.setInt(6, enabled ? 1 : 0);
+                    upStmt.setInt(7, id);
                     upStmt.execute();
                     upStmt.close();
                 } catch (final SQLException e) {
@@ -503,18 +616,6 @@ public class Fungeon {
         return Validity.VALID;
     }
 
-    public String getInvokeCommand() {
-        return invokeCommand;
-    }
-
-    public Validity setInvokeCommand(String command) {
-        if (command.equalsIgnoreCase("")) {
-            return Validity.INVOKE_COMMAND_IS_NULL;
-        }
-        invokeCommand = command;
-        return Validity.VALID;
-    }
-
     public int getWaitRoomTimeLimit() {
         return waitRoomTimeLimit;
     }
@@ -556,6 +657,10 @@ public class Fungeon {
         return name;
     }
 
+    public Location getSignLocation() {
+        return signLocation;
+    }
+
     public Validity setName(String name) {
         if (name.equalsIgnoreCase("")) {
             return Validity.FUNGEON_NAME_IS_EMPTY;
@@ -568,8 +673,8 @@ public class Fungeon {
         return maxPlayers;
     }
 
-    public ArrayList<Player> getPlayers() {
-        return players;
+    public ArrayList<Player> getJoinedPlayers() {
+        return joinedPlayers;
     }
 
     @Override
@@ -627,32 +732,18 @@ public class Fungeon {
         return true;
     }
 
-    public static ArrayList<ItemStack> getItemPrizes(int fungeonID) throws SQLException {
-        final ArrayList<ItemStack> prizes = new ArrayList<ItemStack>();
+    public static ArrayList<String> getCommandWaves(int fungeonID) throws SQLException {
+        final ArrayList<String> commands = new ArrayList<String>();
         final PreparedStatement selStmt = Database.getConn().prepareStatement(
-                "SELECT * FROM prizes WHERE fungeon_id = ? AND item_json IS NOT NULL");
+                "SELECT * FROM invoke_commands WHERE fungeon_id = ?");
         selStmt.setInt(1, fungeonID);
         final ResultSet result = selStmt.executeQuery();
         while (result.next()) {
-            prizes.add(ItemUtils.restoreItem(result.getString("item_json")));
+            commands.add(result.getString("command"));
         }
         result.close();
         selStmt.close();
-        return prizes;
-    }
-
-    public static int getCashPrize(int fungeonID) throws SQLException {
-        int cashPrize = 0;
-        final PreparedStatement selStmt = Database.getConn().prepareStatement(
-                "SELECT * FROM prizes WHERE fungeon_id = ? AND cash_amount >= 0");
-        selStmt.setInt(1, fungeonID);
-        final ResultSet result = selStmt.executeQuery();
-        while (result.next()) {
-            cashPrize += result.getInt("cash_amount");
-        }
-        result.close();
-        selStmt.close();
-        return cashPrize;
+        return commands;
     }
 
     public static void loadAllFungeons() throws SQLException {
@@ -663,6 +754,28 @@ public class Fungeon {
         }
         result.close();
         selStmt.close();
+    }
+
+    public static Fungeon getFungeonFromSignBlock(Block block) {
+        final BlockState bs = block.getState();
+        if (!(bs instanceof Sign)) {
+            return null;
+        }
+        for (final Fungeon fungeon: Fungeon.getAllFungeons().values()) {
+            if (block.getLocation().equals(fungeon.getSignLocation())) {
+                return fungeon;
+            }
+        }
+        return null;
+    }
+
+    public static Fungeon getJoinedFungeon(Player player) {
+        for (final Fungeon fungeon: Fungeon.getAllFungeons().values()) {
+            if (fungeon.getJoinedPlayers().contains(player)) {
+                return fungeon;
+            }
+        }
+        return null;
     }
 
 }

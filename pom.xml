@@ -5,7 +5,8 @@
 	<artifactId>WTAKOFungeon</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>WTAKOFungeon</name>
-	<description>WTAKOFungeon</description>
+	<description>WTAKO Fun dungeons</description>
+	<url>https://gitlab.wtako.net/Saren/wtakofungeon</url>
 
 	<properties>
 		<author>Saren</author>
@@ -22,6 +23,10 @@
 			<id>vault-repo</id>
 			<url>http://nexus.theyeticave.net/content/repositories/pub_releases</url>
 		</repository>
+		<repository>
+			<id>confuser-repo</id>
+			<url>http://ci.frostcast.net/plugin/repository/everything</url>
+		</repository>
 	</repositories>
 
 	<dependencies>
@@ -29,6 +34,12 @@
 			<groupId>org.bukkit</groupId>
 			<artifactId>bukkit</artifactId>
 			<version>1.7.5-R0.1-SNAPSHOT</version>
+			<type>jar</type>
+		</dependency>
+		<dependency>
+			<groupId>me.confuser</groupId>
+			<artifactId>BarAPI</artifactId>
+			<version>3.0</version>
 			<type>jar</type>
 		</dependency>
 		<dependency>

@@ -32,7 +32,7 @@ public class ArgDel {
         Fungeon.getValidFungeons().remove(fungeonID);
         final Fungeon fungeon = Fungeon.getAllFungeons().remove(fungeonID);
         if (fungeon != null) {
-            fungeon.forceReset();
+            fungeon.forceResetAll();
         }
         if (fungeon != null) {
             new BukkitRunnable() {

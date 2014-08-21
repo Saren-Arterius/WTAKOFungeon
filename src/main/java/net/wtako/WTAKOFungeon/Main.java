@@ -9,11 +9,11 @@ import java.util.logging.Logger;
 
 import net.milkbowl.vault.economy.Economy;
 import net.wtako.WTAKOFungeon.Commands.CommandWFun;
+import net.wtako.WTAKOFungeon.EventHandlers.FungeonSignListener;
 import net.wtako.WTAKOFungeon.EventHandlers.FungeonWizardListener;
 import net.wtako.WTAKOFungeon.Methods.Database;
 import net.wtako.WTAKOFungeon.Methods.Fungeon;
 import net.wtako.WTAKOFungeon.Schedulers.FungeonScheduler;
-import net.wtako.WTAKOFungeon.Schedulers.SignUpdateScheduler;
 import net.wtako.WTAKOFungeon.Utils.Config;
 import net.wtako.WTAKOFungeon.Utils.Lang;
 
@@ -33,6 +33,7 @@ public final class Main extends JavaPlugin {
     @Override
     public void onEnable() {
         Main.instance = this;
+        Main.artifactId = getProperty("artifactId");
         Config.saveAll();
         loadLang();
         getCommand(getProperty("mainCommand")).setExecutor(new CommandWFun());
@@ -47,10 +48,8 @@ public final class Main extends JavaPlugin {
         if (FungeonScheduler.getInstance() == null) {
             new FungeonScheduler();
         }
-        if (SignUpdateScheduler.getInstance() == null) {
-            new SignUpdateScheduler();
-        }
         getServer().getPluginManager().registerEvents(new FungeonWizardListener(), this);
+        getServer().getPluginManager().registerEvents(new FungeonSignListener(), this);
     }
 
     @Override
@@ -58,7 +57,7 @@ public final class Main extends JavaPlugin {
         try {
             Database.getConn().close();
             for (final Fungeon fungeon: Fungeon.getAllFungeons().values()) {
-                fungeon.forceReset();
+                fungeon.forceResetAll();
             }
             Fungeon.getAllFungeons().clear();
         } catch (final SQLException e) {

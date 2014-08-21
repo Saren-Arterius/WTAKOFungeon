@@ -15,9 +15,10 @@ public class ArgList {
         for (final Fungeon fungeon: Fungeon.getAllFungeons().values()) {
             final Status status = fungeon.getStatus();
             if (status == Fungeon.Status.FUNGEON_NOT_VALID) {
-                sender.sendMessage(MessageFormat.format("{0} - {1} ({2})", fungeon, status, fungeon.checkValidity()));
+                sender.sendMessage(MessageFormat.format("{0}. {1} - {2} ({3})", fungeon.getID(), fungeon.getName(),
+                        status, fungeon.checkValidity()));
             } else {
-                sender.sendMessage(MessageFormat.format("{0} - {1}", fungeon, status));
+                sender.sendMessage(MessageFormat.format("{0}. {1} - {2}", fungeon.getID(), fungeon.getName(), status));
             }
             fungeons++;
         }
