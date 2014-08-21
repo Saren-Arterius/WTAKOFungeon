@@ -7,6 +7,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map.Entry;
+import java.util.Random;
 
 import me.confuser.barapi.BarAPI;
 import net.wtako.WTAKOFungeon.Main;
@@ -207,7 +208,7 @@ public class Fungeon {
         }
         if (waveCommands == null) {
             try {
-                waveCommands = Fungeon.getCommandWaves(id);
+                waveCommands = InvokeCommand.getCommands(id);
                 return;
             } catch (final SQLException e) {
                 for (final Player player: new ArrayList<Player>(joinedPlayers)) {
@@ -236,10 +237,18 @@ public class Fungeon {
                 for (final Entity mob: getEnemiesLeft()) {
                     mob.remove();
                 }
-                Main.getInstance()
-                        .getServer()
-                        .dispatchCommand(Main.getInstance().getServer().getConsoleSender(),
-                                waveCommands.get(currentWave));
+                for (String command: waveCommands.get(currentWave).split("; *")) {
+                    if (command.length() == 0 || command.equalsIgnoreCase(" ")) {
+                        continue;
+                    }
+                    final Player randomPlayer = joinedPlayers.get(new Random().nextInt(joinedPlayers.size()));
+                    command = MessageFormat.format(command, randomPlayer.getName(), randomPlayer.getWorld().getName(),
+                            randomPlayer.getLocation().getBlockX(), randomPlayer.getLocation().getBlockY(),
+                            randomPlayer.getLocation().getBlockZ());
+                    Main.log.info(MessageFormat.format("Fungeon ({0}) - executing command: /{1}", toString(), command));
+                    Main.getInstance().getServer()
+                            .dispatchCommand(Main.getInstance().getServer().getConsoleSender(), command);
+                }
                 currentWave++;
             }
         }
@@ -555,11 +564,10 @@ public class Fungeon {
                     if (signLocID == null) {
                         signLocID = LocationUtils.saveLocation(signLocation);
                     }
-                    final PreparedStatement upStmt = Database
-                            .getConn()
-                            .prepareStatement(
-                                    "UPDATE `fungeons` SET `lobby_loc_id` = ?, `wait_rm_loc_id` = ?, `area_p1_loc_id` = ?, "
-                                            + "`area_p2_loc_id` = ?, `start_pt_loc_id` = ?, `sign_loc_id` = ? WHERE `row_id` = ?");
+                    final PreparedStatement upStmt = Database.getConn().prepareStatement(
+                            "UPDATE `fungeons` SET `lobby_loc_id` = ?, `wait_rm_loc_id` = ?, "
+                                    + "`area_p1_loc_id` = ?, `area_p2_loc_id` = ?, `start_pt_loc_id` = ?, "
+                                    + "`sign_loc_id` = ? WHERE `row_id` = ?");
                     upStmt.setInt(1, lobbyID);
                     upStmt.setInt(2, waitRoomID);
                     upStmt.setInt(3, areaP1ID);
@@ -733,20 +741,6 @@ public class Fungeon {
             return false;
         }
         return true;
-    }
-
-    public static ArrayList<String> getCommandWaves(int fungeonID) throws SQLException {
-        final ArrayList<String> commands = new ArrayList<String>();
-        final PreparedStatement selStmt = Database.getConn().prepareStatement(
-                "SELECT * FROM invoke_commands WHERE fungeon_id = ?");
-        selStmt.setInt(1, fungeonID);
-        final ResultSet result = selStmt.executeQuery();
-        while (result.next()) {
-            commands.add(result.getString("command"));
-        }
-        result.close();
-        selStmt.close();
-        return commands;
     }
 
     public static void loadAllFungeons() throws SQLException {

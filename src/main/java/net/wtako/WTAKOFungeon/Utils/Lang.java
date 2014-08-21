@@ -14,17 +14,17 @@ public enum Lang {
 
     TITLE("[" + Main.getInstance().getName() + "]"),
 
-    ITEM_PRINT_FORMAT("{0} x {1}"),
+    OBJECT_DELETED("&aSuccessfully deleted {0}! (If it exists)"),
+
+    COMMAND_LIST_FUNGEON("Command invocations for fungeon &f(&f{0}&f):"),
+    COMMAND_ADDED("&aSuccessfully added command ({0}) for fungeon &f(&f{1}&f)&a as command ID {2}."),
+    NO_SUCH_A_COMMAND("&eThere is no such a command where ID is {0}."),
+
     CASH_PRIZE_ADDED("&aSuccessfully added cash prize (${0}) for fungeon &f(&f{1}&f)&a as prize ID {2}."),
     ITEM_PRIZE_ADDED("&aSuccessfully added item prize &f({0}&f)&a for fungeon &f(&f{1}&f)&a as prize ID {2}."),
     NO_SUCH_A_ITEM_PRIZE("&eThere is no such a item prize where ID is {0}."),
     CANNOT_ADD_AIR("&cCannot add air as prize."),
-    OBJECT_DELETED("&aSuccessfully deleted {0}! (If it exists)"),
 
-    FUNGEON("Fungeon"),
-    LOCATION_FORMAT("World: {0}, X: {1}, Y: {2}, Z: {3}"),
-    FUNGEON_PLAYERS_FORMAT("{0}/{1}"),
-    FUNGEON_TO_STRING_FORMAT("{1}"),
     BAR_WAITING_ROOM_IDLE_FORMAT("Fungeon &f(&f{0}&f): Idle - {1}"),
     BAR_WAITING_ROOM_COUNTDOWN_FORMAT("Fungeon &f(&f{0}&f): Countdown - {1}"),
     BAR_FUNGEON_COUNTDOWN_FORMAT("Fungeon &f(&f{0}&f) - Wave {1} | Enemies left: {2}"),
@@ -34,9 +34,7 @@ public enum Lang {
     FUNGEON_DELETE_SUCCESS("&aSuccessfully deleted an existing fungeon. &f(&f{0}&f)"),
     FUNGEON_DOES_NOT_EXIST("&eFungeon ID {0} does not exist."),
     FUNGEON_HAS_NO_WAVES("&cFungeon has no enemy waves."),
-    LIST_TOTAL("Total: {0}"),
-    CASH_PRIZE("Cash prize"),
-    ITEM_PRIZE("Item prize"),
+
     PRIZE_LIST_FUNGEON("Prize list for fungeon &f(&f{0}&f):"),
     NO_FUNGEON_TO_DISPLAY("&eCurrently there is no fungeon to display."),
     FUNGEON_IS_PLAYING("&eThere are players playing this fungeon. Please try again later."),
@@ -66,6 +64,17 @@ public enum Lang {
     CONFIG_SET("&aConfig successfully set. ({0}: {1})"),
     CONFIG_SET_PENDING("&aConfig successfully set. Pending another config... ({0}: {1})"),
     CONFIG_SET_FAIL("&cFailed to set config. Please try again. ({0}: {1}) - {2}"),
+
+    ITEM_PRINT_FORMAT("{0} x {1}"),
+    LOCATION_FORMAT("World: {0}, X: {1}, Y: {2}, Z: {3}"),
+    FUNGEON_PLAYERS_FORMAT("{0}/{1}"),
+    FUNGEON_TO_STRING_FORMAT("{1}"),
+    LIST_TOTAL("Total: {0}"),
+
+    FUNGEON("Fungeon"),
+    CASH_PRIZE("Cash prize"),
+    ITEM_PRIZE("Item prize"),
+    COMMAND("Command"),
     SYSTEM_WORD("system"),
 
     COMMAND_HELP_SEPERATOR("&6 | &a"),
@@ -84,6 +93,16 @@ public enum Lang {
             + " &a{0} &a<fungeon ID>&f to delete all prizes for a fungeon."),
     HELP_PRIZE_LIST("Type &b/" + Main.getInstance().getProperty("mainCommand")
             + " &a{0} &a<fungeon ID>&f to view all prizes of a fungeon."),
+    HELP_COMMAND("Type &b/" + Main.getInstance().getProperty("mainCommand")
+            + " &a{0}&f to manage fungeon command invocations."),
+    HELP_COMMAND_ADD("Type &b/" + Main.getInstance().getProperty("mainCommand")
+            + " &a{0} &a<fungeon ID> <command>&f to add a command to be invoked by a fungeon."),
+    HELP_COMMAND_DEL("Type &b/" + Main.getInstance().getProperty("mainCommand")
+            + " &a{0} &a<command ID>&f to delete an existing fungeon command invocation."),
+    HELP_COMMAND_CLEAR("Type &b/" + Main.getInstance().getProperty("mainCommand")
+            + " &a{0} &a<fungeon ID>&f to delete all command invocations for a fungeon."),
+    HELP_COMMAND_LIST("Type &b/" + Main.getInstance().getProperty("mainCommand")
+            + " &a{0} &a<fungeon ID>&f to view command invocations of a fungeon."),
     HELP_FUNGEON("Type &b/" + Main.getInstance().getProperty("mainCommand") + " &a{0}&f to manage fungeons."),
     HELP_FUNGEON_ADD("Type &b/" + Main.getInstance().getProperty("mainCommand")
             + " &a{0} &a<fungeon name>&f to add a new fungeon."),

@@ -8,6 +8,7 @@ import java.util.Map.Entry;
 import net.wtako.WTAKOFungeon.Main;
 import net.wtako.WTAKOFungeon.Commands.WFun.ArgHelp;
 import net.wtako.WTAKOFungeon.Commands.WFun.ArgReload;
+import net.wtako.WTAKOFungeon.Commands.WFun.SubArgCommand;
 import net.wtako.WTAKOFungeon.Commands.WFun.SubArgFungeon;
 import net.wtako.WTAKOFungeon.Commands.WFun.SubArgPrize;
 
@@ -19,10 +20,12 @@ public enum Commands implements BaseCommands {
     MAIN_COMMAND(Lang.HELP_HELP.toString(), ArgHelp.class, Main.artifactId + ".use"),
     H(Lang.HELP_HELP.toString(), ArgHelp.class, Main.artifactId + ".use"),
     HELP(Lang.HELP_HELP.toString(), ArgHelp.class, Main.artifactId + ".use"),
-    FUNGEON(Lang.HELP_FUNGEON.toString(), SubArgFungeon.class, Main.artifactId + ".use"),
     F(Lang.HELP_FUNGEON.toString(), SubArgFungeon.class, Main.artifactId + ".use"),
-    PRIZE(Lang.HELP_PRIZE.toString(), SubArgPrize.class, Main.artifactId + ".use"),
+    FUNGEON(Lang.HELP_FUNGEON.toString(), SubArgFungeon.class, Main.artifactId + ".use"),
     P(Lang.HELP_PRIZE.toString(), SubArgPrize.class, Main.artifactId + ".use"),
+    PRIZE(Lang.HELP_PRIZE.toString(), SubArgPrize.class, Main.artifactId + ".use"),
+    COM(Lang.HELP_COMMAND.toString(), SubArgCommand.class, Main.artifactId + ".admin"),
+    COMMAND(Lang.HELP_COMMAND.toString(), SubArgCommand.class, Main.artifactId + ".admin"),
     RELOAD(Lang.HELP_RELOAD.toString(), ArgReload.class, Main.artifactId + ".reload");
 
     private String   helpMessage;
