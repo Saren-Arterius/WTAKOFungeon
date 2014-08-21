@@ -433,6 +433,9 @@ public class Fungeon {
 
     public ArrayList<Entity> getEnemiesLeft() {
         final ArrayList<Entity> enemies = new ArrayList<Entity>();
+        if (startPoint == null) {
+            return enemies;
+        }
         for (final Entity mob: startPoint.getWorld().getEntities()) {
             if ((mob instanceof Monster || mob instanceof Animals)
                     && Fungeon.isInRegion(areaP1, areaP2, mob.getLocation())) {

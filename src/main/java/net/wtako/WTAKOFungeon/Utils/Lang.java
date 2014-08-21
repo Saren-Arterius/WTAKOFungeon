@@ -71,8 +71,8 @@ public enum Lang {
     COMMAND_HELP_SEPERATOR("&6 | &a"),
     COMMAND_ARG_IN_USE("&e{0}&a"),
     SUB_COMMAND("Sub-command: &e{0}"),
-    HELP_HELP("Type &b/" + Main.getInstance().getProperty("mainCommand") + " &a{0}&f to show help (this message). {1}"),
-    HELP_RELOAD("Type &b/" + Main.getInstance().getProperty("mainCommand") + " &a{0}&f to reload the plugin. {1}"),
+    HELP_HELP("Type &b/" + Main.getInstance().getProperty("mainCommand") + " &a{0}&f to show help (this message)."),
+    HELP_RELOAD("Type &b/" + Main.getInstance().getProperty("mainCommand") + " &a{0}&f to reload the plugin."),
     HELP_PRIZE("Type &b/" + Main.getInstance().getProperty("mainCommand") + " &a{0}&f to manage fungeon prizes."),
     HELP_PRIZE_ADD("Type &b/" + Main.getInstance().getProperty("mainCommand")
             + " &a{0} &a<fungeon ID> [Cash]&f to add a prize to a fungeon."),
@@ -94,7 +94,7 @@ public enum Lang {
     HELP_FUNGEON_LIST("Type &b/" + Main.getInstance().getProperty("mainCommand") + " &a{0}&f to view all fungeons."),
     HELP_FUNGEON_LIST_CONFIGS("Type &b/" + Main.getInstance().getProperty("mainCommand")
             + " &a{0}&f to view all config values of a fungeon."),
-    NO_PERMISSION_HELP("(&cno permission&f)"),
+    NO_PERMISSION_HELP(" (&cno permission&f)"),
     PLUGIN_RELOADED("&aPlugin reloaded."),
     NO_PERMISSION_COMMAND("&cYou are not allowed to use this command."),
     ERROR_HOOKING("&4Error in hooking into {0}! Please contact server administrators."),

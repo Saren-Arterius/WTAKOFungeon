@@ -110,7 +110,7 @@ public enum Commands implements BaseCommands {
                     }
                     displayCommands = commandName.equalsIgnoreCase("") ? displayCommands : MessageFormat.format(
                             Lang.COMMAND_ARG_IN_USE.toString(), commandName) + " " + displayCommands;
-                    messages.add(MessageFormat.format(entry.getKey(), displayCommands, permissionString));
+                    messages.add(MessageFormat.format(entry.getKey(), displayCommands) + permissionString);
                 }
                 sender.sendMessage(messages.toArray(new String[messages.size()]));
             }
