@@ -157,7 +157,7 @@ public enum Lang {
             + " &a{0} &a<fungeon ID>&f to set config of a fungeon."),
     HELP_FUNGEON_LIST("Type &b/" + Main.getInstance().getProperty("mainCommand") + " &a{0}&f to view all fungeons."),
     HELP_FUNGEON_LIST_CONFIGS("Type &b/" + Main.getInstance().getProperty("mainCommand")
-            + " &a{0}&f to view all config values of a fungeon."),
+            + " &a{0}&f &a<fungeon ID>&f to view all config values of a fungeon."),
 
     NO_PERMISSION_HELP(" (&cno permission&f)"),
     PLUGIN_RELOADED("&aPlugin reloaded."),

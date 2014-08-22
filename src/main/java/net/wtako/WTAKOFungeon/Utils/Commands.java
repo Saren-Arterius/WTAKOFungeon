@@ -7,6 +7,7 @@ import java.util.Map.Entry;
 
 import net.wtako.WTAKOFungeon.Main;
 import net.wtako.WTAKOFungeon.Commands.WFun.ArgHelp;
+import net.wtako.WTAKOFungeon.Commands.WFun.ArgKick;
 import net.wtako.WTAKOFungeon.Commands.WFun.ArgLeave;
 import net.wtako.WTAKOFungeon.Commands.WFun.ArgReload;
 import net.wtako.WTAKOFungeon.Commands.WFun.SubArgCommand;
@@ -24,6 +25,8 @@ public enum Commands implements BaseCommands {
     HELP(Lang.HELP_HELP.toString(), ArgHelp.class, Main.artifactId + ".use"),
     LEAVE(Lang.HELP_LEAVE.toString(), ArgLeave.class, Main.artifactId + ".use"),
     F(Lang.HELP_FUNGEON.toString(), SubArgFungeon.class, Main.artifactId + ".use"),
+    K(Lang.HELP_KICK.toString(), ArgKick.class, Main.artifactId + ".use"),
+    KICK(Lang.HELP_KICK.toString(), ArgKick.class, Main.artifactId + ".use"),
     FUNGEON(Lang.HELP_FUNGEON.toString(), SubArgFungeon.class, Main.artifactId + ".use"),
     P(Lang.HELP_PRIZE.toString(), SubArgPrize.class, Main.artifactId + ".use"),
     PRIZE(Lang.HELP_PRIZE.toString(), SubArgPrize.class, Main.artifactId + ".use"),

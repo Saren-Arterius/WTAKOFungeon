@@ -30,6 +30,7 @@ public class ArgListConfigs {
             sender.sendMessage(MessageFormat.format(Lang.FUNGEON_DOES_NOT_EXIST.toString(), fungeonID));
             return;
         }
+        sender.sendMessage("====================");
         sender.sendMessage(MessageFormat.format("ID: {0}", fungeon.getID()));
         sender.sendMessage(MessageFormat.format("Name: {0}", fungeon.getName()));
         sender.sendMessage(MessageFormat.format("Enabled: {0}", fungeon.isEnabled()));
@@ -45,6 +46,7 @@ public class ArgListConfigs {
         sender.sendMessage(MessageFormat.format("Start point: {0}",
                 LocationUtils.toHumanReadable(fungeon.getStartLocation())));
         sender.sendMessage(MessageFormat.format("Status: {0}", fungeon.getStatus().name()));
+        sender.sendMessage("====================");
     }
 
 }
