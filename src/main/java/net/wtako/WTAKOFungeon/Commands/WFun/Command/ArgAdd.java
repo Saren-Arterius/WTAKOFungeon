@@ -6,7 +6,7 @@ import java.text.MessageFormat;
 import net.wtako.WTAKOFungeon.Main;
 import net.wtako.WTAKOFungeon.Methods.Fungeon;
 import net.wtako.WTAKOFungeon.Methods.InvokeCommand;
-import net.wtako.WTAKOFungeon.Utils.CommandsWFun;
+import net.wtako.WTAKOFungeon.Utils.CommandHelper;
 import net.wtako.WTAKOFungeon.Utils.Lang;
 
 import org.bukkit.command.CommandSender;
@@ -16,14 +16,14 @@ public class ArgAdd {
 
     public ArgAdd(final CommandSender sender, final String[] args) {
         if (args.length < 4) {
-            sender.sendMessage(MessageFormat.format(Lang.HELP_COMMAND_ADD.toString(), CommandsWFun.joinArgsInUse(args, 2)));
+            sender.sendMessage(MessageFormat.format(Lang.HELP_COMMAND_ADD.toString(), CommandHelper.joinArgsInUse(args, 2)));
             return;
         }
         final Integer fungeonID;
         try {
             fungeonID = Integer.parseInt(args[2]);
         } catch (final NumberFormatException e) {
-            sender.sendMessage(MessageFormat.format(Lang.HELP_COMMAND_ADD.toString(), CommandsWFun.joinArgsInUse(args, 2)));
+            sender.sendMessage(MessageFormat.format(Lang.HELP_COMMAND_ADD.toString(), CommandHelper.joinArgsInUse(args, 2)));
             return;
         }
         final Fungeon fungeon = Fungeon.getAllFungeons().get(fungeonID);

@@ -5,7 +5,7 @@ import java.text.MessageFormat;
 
 import net.wtako.WTAKOFungeon.Main;
 import net.wtako.WTAKOFungeon.Methods.Prize;
-import net.wtako.WTAKOFungeon.Utils.CommandsWFun;
+import net.wtako.WTAKOFungeon.Utils.CommandHelper;
 import net.wtako.WTAKOFungeon.Utils.ItemStackUtils;
 import net.wtako.WTAKOFungeon.Utils.Lang;
 
@@ -19,14 +19,14 @@ public class ArgGet {
     public ArgGet(final CommandSender sender, String[] args) {
         if (args.length < 3) {
             sender.sendMessage(MessageFormat.format(Lang.HELP_PRIZE_GET.toString(),
-                    CommandsWFun.joinArgsInUse(args, args.length)));
+                    CommandHelper.joinArgsInUse(args, args.length)));
             return;
         }
         final Integer prizeID;
         try {
             prizeID = Integer.parseInt(args[2]);
         } catch (final NumberFormatException e) {
-            sender.sendMessage(MessageFormat.format(Lang.HELP_PRIZE_GET.toString(), CommandsWFun.joinArgsInUse(args, 2)));
+            sender.sendMessage(MessageFormat.format(Lang.HELP_PRIZE_GET.toString(), CommandHelper.joinArgsInUse(args, 2)));
             return;
         }
         new BukkitRunnable() {

@@ -4,7 +4,7 @@ import java.text.MessageFormat;
 
 import net.wtako.WTAKOFungeon.EventHandlers.FungeonWizardListener;
 import net.wtako.WTAKOFungeon.Methods.Fungeon;
-import net.wtako.WTAKOFungeon.Utils.CommandsWFun;
+import net.wtako.WTAKOFungeon.Utils.CommandHelper;
 import net.wtako.WTAKOFungeon.Utils.Lang;
 
 import org.bukkit.command.CommandSender;
@@ -15,14 +15,14 @@ public class ArgSet {
     public ArgSet(CommandSender sender, String[] args) {
         if (args.length < 3) {
             sender.sendMessage(MessageFormat.format(Lang.HELP_FUNGEON_SET.toString(),
-                    CommandsWFun.joinArgsInUse(args, args.length)));
+                    CommandHelper.joinArgsInUse(args, args.length)));
             return;
         }
         Integer fungeonID;
         try {
             fungeonID = Integer.parseInt(args[2]);
         } catch (final NumberFormatException e) {
-            sender.sendMessage(MessageFormat.format(Lang.HELP_FUNGEON_SET.toString(), CommandsWFun.joinArgsInUse(args, 2)));
+            sender.sendMessage(MessageFormat.format(Lang.HELP_FUNGEON_SET.toString(), CommandHelper.joinArgsInUse(args, 2)));
             return;
         }
         final Fungeon fungeon = Fungeon.getAllFungeons().get(fungeonID);

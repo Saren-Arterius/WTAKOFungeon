@@ -5,7 +5,7 @@ import java.text.MessageFormat;
 
 import net.wtako.WTAKOFungeon.Main;
 import net.wtako.WTAKOFungeon.Methods.Fungeon;
-import net.wtako.WTAKOFungeon.Utils.CommandsWFun;
+import net.wtako.WTAKOFungeon.Utils.CommandHelper;
 import net.wtako.WTAKOFungeon.Utils.Lang;
 
 import org.bukkit.command.CommandSender;
@@ -16,7 +16,7 @@ public class ArgAdd {
     public ArgAdd(final CommandSender sender, final String[] args) {
         if (args.length < 3) {
             sender.sendMessage(MessageFormat.format(Lang.HELP_FUNGEON_ADD.toString(),
-                    CommandsWFun.joinArgsInUse(args, args.length)));
+                    CommandHelper.joinArgsInUse(args, args.length)));
             return;
         }
         new BukkitRunnable() {

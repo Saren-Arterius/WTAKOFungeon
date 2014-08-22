@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import net.wtako.WTAKOFungeon.Main;
 import net.wtako.WTAKOFungeon.Methods.Cost;
 import net.wtako.WTAKOFungeon.Methods.Fungeon;
-import net.wtako.WTAKOFungeon.Utils.CommandsWFun;
+import net.wtako.WTAKOFungeon.Utils.CommandHelper;
 import net.wtako.WTAKOFungeon.Utils.ItemStackUtils;
 import net.wtako.WTAKOFungeon.Utils.Lang;
 
@@ -21,14 +21,14 @@ public class ArgHas {
     public ArgHas(final CommandSender sender, String[] args) {
         if (args.length < 3) {
             sender.sendMessage(MessageFormat.format(Lang.HELP_COST_HAS.toString(),
-                    CommandsWFun.joinArgsInUse(args, args.length)));
+                    CommandHelper.joinArgsInUse(args, args.length)));
             return;
         }
         final Integer fungeonID;
         try {
             fungeonID = Integer.parseInt(args[2]);
         } catch (final NumberFormatException e) {
-            sender.sendMessage(MessageFormat.format(Lang.HELP_COST_HAS.toString(), CommandsWFun.joinArgsInUse(args, 2)));
+            sender.sendMessage(MessageFormat.format(Lang.HELP_COST_HAS.toString(), CommandHelper.joinArgsInUse(args, 2)));
             return;
         }
         final Fungeon fungeon = Fungeon.getAllFungeons().get(fungeonID);

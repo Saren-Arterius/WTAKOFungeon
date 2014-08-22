@@ -5,7 +5,7 @@ import java.text.MessageFormat;
 
 import net.wtako.WTAKOFungeon.Main;
 import net.wtako.WTAKOFungeon.Methods.InvokeCommand;
-import net.wtako.WTAKOFungeon.Utils.CommandsWFun;
+import net.wtako.WTAKOFungeon.Utils.CommandHelper;
 import net.wtako.WTAKOFungeon.Utils.Lang;
 
 import org.bukkit.command.CommandSender;
@@ -16,14 +16,14 @@ public class ArgDel {
     public ArgDel(final CommandSender sender, String[] args) {
         if (args.length < 3) {
             sender.sendMessage(MessageFormat.format(Lang.HELP_COMMAND_DEL.toString(),
-                    CommandsWFun.joinArgsInUse(args, args.length)));
+                    CommandHelper.joinArgsInUse(args, args.length)));
             return;
         }
         final Integer commandID;
         try {
             commandID = Integer.parseInt(args[2]);
         } catch (final NumberFormatException e) {
-            sender.sendMessage(MessageFormat.format(Lang.HELP_COMMAND_DEL.toString(), CommandsWFun.joinArgsInUse(args, 2)));
+            sender.sendMessage(MessageFormat.format(Lang.HELP_COMMAND_DEL.toString(), CommandHelper.joinArgsInUse(args, 2)));
             return;
         }
         new BukkitRunnable() {

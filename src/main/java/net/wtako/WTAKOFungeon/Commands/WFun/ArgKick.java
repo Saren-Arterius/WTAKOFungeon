@@ -5,7 +5,7 @@ import java.text.MessageFormat;
 import net.wtako.WTAKOFungeon.Main;
 import net.wtako.WTAKOFungeon.Methods.Fungeon;
 import net.wtako.WTAKOFungeon.Methods.Fungeon.Error;
-import net.wtako.WTAKOFungeon.Utils.CommandsWFun;
+import net.wtako.WTAKOFungeon.Utils.CommandHelper;
 import net.wtako.WTAKOFungeon.Utils.Lang;
 
 import org.bukkit.command.CommandSender;
@@ -16,7 +16,7 @@ public class ArgKick {
     @SuppressWarnings("deprecation")
     public ArgKick(final CommandSender sender, String[] args) {
         if (args.length < 2) {
-            sender.sendMessage(MessageFormat.format(Lang.HELP_KICK.toString(), CommandsWFun.joinArgsInUse(args, 1)));
+            sender.sendMessage(MessageFormat.format(Lang.HELP_KICK.toString(), CommandHelper.joinArgsInUse(args, 1)));
             return;
         }
         final Player kicker = (Player) sender;
