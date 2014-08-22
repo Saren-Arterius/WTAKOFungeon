@@ -3,7 +3,7 @@ package net.wtako.WTAKOFungeon.Commands.WFun.Fungeon;
 import java.text.MessageFormat;
 
 import net.wtako.WTAKOFungeon.Methods.Fungeon;
-import net.wtako.WTAKOFungeon.Utils.Commands;
+import net.wtako.WTAKOFungeon.Utils.CommandsWFun;
 import net.wtako.WTAKOFungeon.Utils.Lang;
 import net.wtako.WTAKOFungeon.Utils.LocationUtils;
 
@@ -14,7 +14,7 @@ public class ArgListConfigs {
     public ArgListConfigs(CommandSender sender, String[] args) {
         if (args.length < 3) {
             sender.sendMessage(MessageFormat.format(Lang.HELP_FUNGEON_LIST_CONFIGS.toString(),
-                    Commands.joinArgsInUse(args, args.length)));
+                    CommandsWFun.joinArgsInUse(args, args.length)));
             return;
         }
         Integer fungeonID;
@@ -22,7 +22,7 @@ public class ArgListConfigs {
             fungeonID = Integer.parseInt(args[2]);
         } catch (final NumberFormatException e) {
             sender.sendMessage(MessageFormat.format(Lang.HELP_FUNGEON_LIST_CONFIGS.toString(),
-                    Commands.joinArgsInUse(args, args.length)));
+                    CommandsWFun.joinArgsInUse(args, args.length)));
             return;
         }
         final Fungeon fungeon = Fungeon.getAllFungeons().get(fungeonID);

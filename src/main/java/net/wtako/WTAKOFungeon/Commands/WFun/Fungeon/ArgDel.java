@@ -7,7 +7,7 @@ import java.text.MessageFormat;
 import net.wtako.WTAKOFungeon.Main;
 import net.wtako.WTAKOFungeon.Methods.Database;
 import net.wtako.WTAKOFungeon.Methods.Fungeon;
-import net.wtako.WTAKOFungeon.Utils.Commands;
+import net.wtako.WTAKOFungeon.Utils.CommandsWFun;
 import net.wtako.WTAKOFungeon.Utils.Lang;
 
 import org.bukkit.command.CommandSender;
@@ -18,7 +18,7 @@ public class ArgDel {
     public ArgDel(final CommandSender sender, String[] args) {
         if (args.length < 3) {
             sender.sendMessage(MessageFormat.format(Lang.HELP_FUNGEON_DEL.toString(),
-                    Commands.joinArgsInUse(args, args.length)));
+                    CommandsWFun.joinArgsInUse(args, args.length)));
             return;
         }
         final Integer fungeonID;
@@ -26,7 +26,7 @@ public class ArgDel {
             fungeonID = Integer.parseInt(args[2]);
         } catch (final NumberFormatException e) {
             sender.sendMessage(MessageFormat.format(Lang.HELP_FUNGEON_DEL.toString(),
-                    Commands.joinArgsInUse(args, args.length)));
+                    CommandsWFun.joinArgsInUse(args, args.length)));
             return;
         }
         Fungeon.getValidFungeons().remove(fungeonID);

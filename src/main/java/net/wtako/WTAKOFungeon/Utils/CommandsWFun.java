@@ -18,7 +18,7 @@ import net.wtako.WTAKOFungeon.Commands.WFun.SubArgPrize;
 import org.bukkit.command.CommandSender;
 import org.bukkit.scheduler.BukkitRunnable;
 
-public enum Commands implements BaseCommands {
+public enum CommandsWFun implements BaseCommands {
 
     MAIN_COMMAND(Lang.HELP_HELP.toString(), ArgHelp.class, Main.artifactId + ".use"),
     H(Lang.HELP_HELP.toString(), ArgHelp.class, Main.artifactId + ".use"),
@@ -109,7 +109,7 @@ public enum Commands implements BaseCommands {
 
     private String   permission;
 
-    private Commands(String helpMessage, Class<?> targetClass, String permission) {
+    private CommandsWFun(String helpMessage, Class<?> targetClass, String permission) {
         this.helpMessage = helpMessage;
         this.targetClass = targetClass;
         this.permission = permission;

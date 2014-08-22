@@ -6,7 +6,7 @@ import java.text.MessageFormat;
 import net.wtako.WTAKOFungeon.Main;
 import net.wtako.WTAKOFungeon.Methods.Fungeon;
 import net.wtako.WTAKOFungeon.Methods.Prize;
-import net.wtako.WTAKOFungeon.Utils.Commands;
+import net.wtako.WTAKOFungeon.Utils.CommandsWFun;
 import net.wtako.WTAKOFungeon.Utils.ItemStackUtils;
 import net.wtako.WTAKOFungeon.Utils.Lang;
 
@@ -21,14 +21,14 @@ public class ArgAdd {
     public ArgAdd(final CommandSender sender, final String[] args) {
         if (args.length < 3) {
             sender.sendMessage(MessageFormat.format(Lang.HELP_PRIZE_ADD.toString(),
-                    Commands.joinArgsInUse(args, args.length)));
+                    CommandsWFun.joinArgsInUse(args, args.length)));
             return;
         }
         final Integer fungeonID;
         try {
             fungeonID = Integer.parseInt(args[2]);
         } catch (final NumberFormatException e) {
-            sender.sendMessage(MessageFormat.format(Lang.HELP_PRIZE_ADD.toString(), Commands.joinArgsInUse(args, 2)));
+            sender.sendMessage(MessageFormat.format(Lang.HELP_PRIZE_ADD.toString(), CommandsWFun.joinArgsInUse(args, 2)));
             return;
         }
         final Fungeon fungeon = Fungeon.getAllFungeons().get(fungeonID);
@@ -47,7 +47,7 @@ public class ArgAdd {
                                 fungeon.toString(), Prize.addCashPrize(fungeonID, money)));
                     } catch (final NumberFormatException e) {
                         sender.sendMessage(MessageFormat.format(Lang.HELP_PRIZE_ADD.toString(),
-                                Commands.joinArgsInUse(args, 3)));
+                                CommandsWFun.joinArgsInUse(args, 3)));
                     } catch (final SQLException e) {
                         sender.sendMessage(Lang.DB_EXCEPTION.toString());
                         e.printStackTrace();

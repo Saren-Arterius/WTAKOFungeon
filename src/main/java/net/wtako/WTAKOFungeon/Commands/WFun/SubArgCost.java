@@ -9,7 +9,7 @@ import net.wtako.WTAKOFungeon.Commands.WFun.Cost.ArgDel;
 import net.wtako.WTAKOFungeon.Commands.WFun.Cost.ArgHas;
 import net.wtako.WTAKOFungeon.Commands.WFun.Cost.ArgList;
 import net.wtako.WTAKOFungeon.Utils.BaseCommands;
-import net.wtako.WTAKOFungeon.Utils.Commands;
+import net.wtako.WTAKOFungeon.Utils.CommandsWFun;
 import net.wtako.WTAKOFungeon.Utils.Lang;
 
 import org.bukkit.command.CommandSender;
@@ -52,7 +52,7 @@ public class SubArgCost {
 
     public SubArgCost(final CommandSender sender, String[] args) {
         if (args.length < 2 || !callCommand(sender, args, args[1])) {
-            Commands.sendHelp(sender, SubCommands.values(), args[0]);
+            CommandsWFun.sendHelp(sender, SubCommands.values(), args[0]);
         }
     }
 

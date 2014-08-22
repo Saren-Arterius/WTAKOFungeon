@@ -9,7 +9,7 @@ import net.wtako.WTAKOFungeon.Commands.WFun.Fungeon.ArgList;
 import net.wtako.WTAKOFungeon.Commands.WFun.Fungeon.ArgListConfigs;
 import net.wtako.WTAKOFungeon.Commands.WFun.Fungeon.ArgSet;
 import net.wtako.WTAKOFungeon.Utils.BaseCommands;
-import net.wtako.WTAKOFungeon.Utils.Commands;
+import net.wtako.WTAKOFungeon.Utils.CommandsWFun;
 import net.wtako.WTAKOFungeon.Utils.Lang;
 
 import org.bukkit.command.CommandSender;
@@ -53,7 +53,7 @@ public class SubArgFungeon {
 
     public SubArgFungeon(final CommandSender sender, String[] args) {
         if (args.length < 2 || !callCommand(sender, args, args[1])) {
-            Commands.sendHelp(sender, SubCommands.values(), args[0]);
+            CommandsWFun.sendHelp(sender, SubCommands.values(), args[0]);
         }
     }
 
