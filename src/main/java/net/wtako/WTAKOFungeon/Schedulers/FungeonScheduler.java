@@ -7,9 +7,10 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 public class FungeonScheduler extends BukkitRunnable {
 
-    private static FungeonScheduler instance = new FungeonScheduler();
+    private static FungeonScheduler instance;
 
-    private FungeonScheduler() {
+    public FungeonScheduler() {
+        FungeonScheduler.instance = this;
         runTaskTimer(Main.getInstance(), 0L, 20L);
     }
 
