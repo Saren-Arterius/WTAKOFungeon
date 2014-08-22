@@ -11,6 +11,7 @@ import net.milkbowl.vault.economy.Economy;
 import net.wtako.WTAKOFungeon.Commands.CommandWFun;
 import net.wtako.WTAKOFungeon.EventHandlers.FungeonSignListener;
 import net.wtako.WTAKOFungeon.EventHandlers.FungeonWizardListener;
+import net.wtako.WTAKOFungeon.EventHandlers.PlayerItemDropListener;
 import net.wtako.WTAKOFungeon.Methods.Database;
 import net.wtako.WTAKOFungeon.Methods.Fungeon;
 import net.wtako.WTAKOFungeon.Schedulers.FungeonScheduler;
@@ -51,6 +52,7 @@ public final class Main extends JavaPlugin {
         }
         getServer().getPluginManager().registerEvents(new FungeonWizardListener(), this);
         getServer().getPluginManager().registerEvents(new FungeonSignListener(), this);
+        getServer().getPluginManager().registerEvents(new PlayerItemDropListener(), this);
     }
 
     @Override

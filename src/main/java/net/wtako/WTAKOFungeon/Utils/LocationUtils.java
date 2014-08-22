@@ -78,4 +78,26 @@ public class LocationUtils {
         selStmt.close();
         return locID;
     }
+
+    public static boolean isInRegion(Location p1, Location p2, Location check) {
+        if (p1.getWorld() != p2.getWorld()) {
+            return false;
+        }
+        if (p1.getWorld() != check.getWorld()) {
+            return false;
+        }
+        if (!((p1.getX() <= check.getX() && check.getX() <= p2.getX()) || (p2.getX() <= check.getX() && check.getX() <= p1
+                .getX()))) {
+            return false;
+        }
+        if (!((p1.getY() <= check.getY() && check.getY() <= p2.getY()) || (p2.getY() <= check.getY() && check.getY() <= p1
+                .getY()))) {
+            return false;
+        }
+        if (!((p1.getZ() <= check.getZ() && check.getZ() <= p2.getZ()) || (p2.getZ() <= check.getZ() && check.getZ() <= p1
+                .getZ()))) {
+            return false;
+        }
+        return true;
+    }
 }

@@ -13,6 +13,7 @@ import net.wtako.WTAKOFungeon.Methods.FungeonWizard.EnabledWizard;
 import net.wtako.WTAKOFungeon.Methods.FungeonWizard.LobbyWizard;
 import net.wtako.WTAKOFungeon.Methods.FungeonWizard.MinMaxPlayersWizard;
 import net.wtako.WTAKOFungeon.Methods.FungeonWizard.NameWizard;
+import net.wtako.WTAKOFungeon.Methods.FungeonWizard.RespawningWizard;
 import net.wtako.WTAKOFungeon.Methods.FungeonWizard.SignWizard;
 import net.wtako.WTAKOFungeon.Methods.FungeonWizard.TimeLimitsWizard;
 import net.wtako.WTAKOFungeon.Methods.FungeonWizard.WaitRoomWizard;
@@ -42,6 +43,7 @@ public class FungeonWizardListener implements Listener {
         SIGN(WizardType.BLOCK_BREAK, SignWizard.class),
         NAME(WizardType.INPUT, NameWizard.class),
         ENABLED(WizardType.INPUT, EnabledWizard.class),
+        RESPAWNING(WizardType.INPUT, RespawningWizard.class),
         TIME_LIMITS(WizardType.INPUT, TimeLimitsWizard.class),
         MIN_MAX_PLAYERS(WizardType.INPUT, MinMaxPlayersWizard.class);
 
@@ -107,7 +109,8 @@ public class FungeonWizardListener implements Listener {
         if (FungeonWizardListener.inStartWizards.containsKey(event.getPlayer())) {
             event.setCancelled(true);
             try {
-                final FungeonConfig targetConfig = FungeonConfig.valueOf(event.getMessage().toUpperCase());
+                final FungeonConfig targetConfig = FungeonConfig.valueOf(event.getMessage().toUpperCase()
+                        .replace("-", "_"));
                 FungeonWizardListener.inWizards.put(
                         event.getPlayer(),
                         (BaseWizard) targetConfig
@@ -118,7 +121,8 @@ public class FungeonWizardListener implements Listener {
                 FungeonWizardListener.inStartWizards.remove(event.getPlayer());
             } catch (final IllegalArgumentException e) {
                 event.getPlayer().sendMessage(
-                        MessageFormat.format(Lang.NO_SUCH_A_CONFIG.toString(), event.getMessage().toUpperCase()));
+                        MessageFormat.format(Lang.NO_SUCH_A_CONFIG.toString(), event.getMessage().toLowerCase()
+                                .replace("_", "-")));
             } catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException
                     | InvocationTargetException e) {
                 e.printStackTrace();
@@ -134,17 +138,20 @@ public class FungeonWizardListener implements Listener {
             final Validity result = wizard.setValue(event.getMessage());
             if (result == Validity.VALID) {
                 event.getPlayer().sendMessage(
-                        MessageFormat.format(Lang.CONFIG_SET.toString(), FungeonConfig.getConfig(wizard.getClass()),
-                                event.getMessage()));
+                        MessageFormat.format(Lang.CONFIG_SET.toString(), FungeonConfig.getConfig(wizard.getClass())
+                                .name().toLowerCase().replace("_", "-"), event.getMessage()));
+                event.getPlayer().sendMessage(Lang.EXIT_WIZARD.toString());
                 FungeonWizardListener.inWizards.remove(event.getPlayer());
             } else if (result == Validity.PENDING) {
                 event.getPlayer().sendMessage(
                         MessageFormat.format(Lang.CONFIG_SET_PENDING.toString(),
-                                FungeonConfig.getConfig(wizard.getClass()), event.getMessage()));
+                                FungeonConfig.getConfig(wizard.getClass()).name().toLowerCase().replace("_", "-"),
+                                event.getMessage()));
             } else {
                 event.getPlayer().sendMessage(
-                        MessageFormat.format(Lang.CONFIG_SET_FAIL.toString(),
-                                FungeonConfig.getConfig(wizard.getClass()), event.getMessage(), result.name()));
+                        MessageFormat.format(Lang.CONFIG_SET_FAIL.toString(), FungeonConfig
+                                .getConfig(wizard.getClass()).name().toLowerCase().replace("_", "-"),
+                                event.getMessage(), result.name()));
             }
         }
 
@@ -160,7 +167,7 @@ public class FungeonWizardListener implements Listener {
         player.sendMessage(MessageFormat.format(Lang.WELCOME_TO_WIZARD.toString(), fungeon.toString()));
         String msg = "";
         for (int i = 0; i < FungeonConfig.values().length; i++) {
-            msg += FungeonConfig.values()[i].name();
+            msg += FungeonConfig.values()[i].name().toLowerCase().replace("_", "-");
             if (i < FungeonConfig.values().length - 1) {
                 msg += ", ";
             }

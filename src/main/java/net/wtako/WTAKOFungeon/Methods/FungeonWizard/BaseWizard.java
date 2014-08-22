@@ -18,8 +18,8 @@ public abstract class BaseWizard {
     public BaseWizard(Player player, Fungeon fungeon) {
         this.player = player;
         this.fungeon = fungeon;
-        player.sendMessage(MessageFormat.format(Lang.CONFIG_WIZARD.toString(),
-                FungeonWizardListener.FungeonConfig.getConfig(getClass())));
+        player.sendMessage(MessageFormat.format(Lang.CONFIG_WIZARD.toString(), FungeonWizardListener.FungeonConfig
+                .getConfig(getClass()).name().toLowerCase().replace("_", "-")));
     }
 
     abstract public Validity setValue(Object value) throws SQLException;

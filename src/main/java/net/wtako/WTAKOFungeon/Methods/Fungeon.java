@@ -11,6 +11,10 @@ import java.util.Random;
 
 import me.confuser.barapi.BarAPI;
 import net.wtako.WTAKOFungeon.Main;
+import net.wtako.WTAKOFungeon.Events.FungeonEndEvent;
+import net.wtako.WTAKOFungeon.Events.FungeonStartEvent;
+import net.wtako.WTAKOFungeon.Events.PlayerJoinFungeonEvent;
+import net.wtako.WTAKOFungeon.Events.PlayerLeaveFungeonEvent;
 import net.wtako.WTAKOFungeon.Utils.Config;
 import net.wtako.WTAKOFungeon.Utils.ItemStackUtils;
 import net.wtako.WTAKOFungeon.Utils.Lang;
@@ -31,9 +35,11 @@ public class Fungeon {
 
     private static HashMap<Integer, Fungeon> allFungeons            = new HashMap<Integer, Fungeon>();
     private final ArrayList<Player>          joinedPlayers          = new ArrayList<Player>();
+    private final HashMap<Player, Long>      ooaPlayers             = new HashMap<Player, Long>();
     private boolean                          isPlaying              = false;
     private Integer                          id;
     private boolean                          enabled                = true;
+    private boolean                          respawning             = false;
     private String                           name;
     private Integer                          fungeonTimeLimit;
     private Integer                          minPlayers;
@@ -51,6 +57,8 @@ public class Fungeon {
     private Integer                          lastJoinedPlayersCount = 0;
     private Integer                          currentWave            = 0;
     private ArrayList<String>                waveCommands;
+    private ArrayList<ItemStack>             itemCosts;
+    private Integer                          cashCost;
 
     public Fungeon(String fungeonName) throws SQLException {
         enabled = true;
@@ -60,17 +68,19 @@ public class Fungeon {
         maxPlayers = Config.DEFAULT_MAX_PLAYERS.getInt();
         waitRoomTimeLimit = Config.DEFAULT_WAITING_ROOM_TIME.getInt();
         final PreparedStatement insStmt = Database.getConn().prepareStatement(
-                "INSERT INTO `fungeons` (`enabled`, `fungeon_name`, "
-                        + "`time_limit`, `min_players`, `max_players`, `wait_time`) VALUES (?, ?, ?, ?, ?, ?)");
+                "INSERT INTO `fungeons` (`enabled`, `fungeon_name`, `time_limit`, `min_players`, `max_players`, "
+                        + "`wait_time`, `respawning`) VALUES (?, ?, ?, ?, ?, ?, ?)");
         insStmt.setInt(1, 1);
         insStmt.setString(2, fungeonName);
         insStmt.setInt(3, fungeonTimeLimit);
         insStmt.setInt(4, minPlayers);
         insStmt.setInt(5, maxPlayers);
         insStmt.setInt(6, waitRoomTimeLimit);
+        insStmt.setInt(7, 0);
         insStmt.execute();
         insStmt.close();
         id = insStmt.getGeneratedKeys().getInt(1);
+        updateCosts();
         Fungeon.allFungeons.put(id, this);
     }
 
@@ -86,6 +96,7 @@ public class Fungeon {
         }
         id = fungeonID;
         enabled = result.getInt("enabled") == 0 ? false : true;
+        respawning = result.getInt("respawning") == 0 ? false : true;
         name = result.getString("fungeon_name");
         fungeonTimeLimit = result.getInt("time_limit");
         minPlayers = result.getInt("min_players");
@@ -97,6 +108,7 @@ public class Fungeon {
         areaP2 = LocationUtils.getLocation(result.getInt("area_p2_loc_id"));
         startPoint = LocationUtils.getLocation(result.getInt("start_pt_loc_id"));
         signLocation = LocationUtils.getLocation(result.getInt("sign_loc_id"));
+        updateCosts();
         Fungeon.allFungeons.put(fungeonID, this);
     }
 
@@ -114,7 +126,9 @@ public class Fungeon {
         SIGN_LOCATION_IS_NULL,
         SIGN_LOCATION_HAS_NO_SIGN,
         INVOKE_COMMAND_IS_NULL,
-        START_POINT_NOT_IN_AREA,
+        START_POINT_NOT_IN_FUNGEON_AREA,
+        LOCATION_IN_FUNGEON_AREA,
+        COSTS_NOT_READY,
         PARSE_FAIL,
         PENDING,
         VALID
@@ -129,6 +143,8 @@ public class Fungeon {
         NOT_ENOUGH_PLAYERS,
         FUNGEON_NOT_VALID,
         NOT_TEAM_LEADER,
+        CANNOT_AFFORD,
+        EVENT_CANCELLED,
         SUCCESS
     }
 
@@ -137,6 +153,17 @@ public class Fungeon {
         IDLE,
         WAIT_COUNTDOWN,
         PLAYING,
+    }
+
+    public enum LeaveCause {
+        COMMAND,
+        DEATH,
+        DISCONNECT,
+        OUT_OF_AREA,
+        PLAYER_KICK,
+        ITEM_FAIL,
+        SYSTEM_KICK,
+        GAME_END,
     }
 
     public void updatePlayerBars() {
@@ -171,6 +198,20 @@ public class Fungeon {
         }
     }
 
+    public void updateCosts() {
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                try {
+                    itemCosts = Cost.getItemCosts(id);
+                    cashCost = Cost.getCashCost(id);
+                } catch (final SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }.runTaskAsynchronously(Main.getInstance());
+    }
+
     public void updateSign() {
         if (signLocation == null) {
             return;
@@ -200,6 +241,51 @@ public class Fungeon {
         }
     }
 
+    public void checkPlayerLocations() {
+        final Status status = getStatus();
+        if (status == Status.FUNGEON_NOT_VALID) {
+            return;
+        }
+        if (status != Status.PLAYING) {
+            for (final Player player: Main.getInstance().getServer().getOnlinePlayers()) {
+                if (player.hasPermission(Main.artifactId + ".admin")) {
+                    continue;
+                }
+                if (LocationUtils.isInRegion(areaP1, areaP2, player.getLocation())) {
+                    player.teleport(lobby);
+                }
+            }
+        } else {
+            for (final Player player: Main.getInstance().getServer().getOnlinePlayers()) {
+                if (player.hasPermission(Main.artifactId + ".admin")) {
+                    continue;
+                }
+                if (!joinedPlayers.contains(player) && LocationUtils.isInRegion(areaP1, areaP2, player.getLocation())) {
+                    player.teleport(lobby);
+                    continue;
+                }
+                if (joinedPlayers.contains(player) && !LocationUtils.isInRegion(areaP1, areaP2, player.getLocation())) {
+                    if (!ooaPlayers.containsKey(player)) {
+                        player.sendMessage(MessageFormat.format(Lang.YOU_LEFT_FUNGEON_AREA.toString(),
+                                Config.OUT_OF_AREA_KICK_TIMEOUT.getInt()));
+                        ooaPlayers.put(player, System.currentTimeMillis());
+                    } else if (System.currentTimeMillis() - ooaPlayers.get(player) >= Config.OUT_OF_AREA_KICK_TIMEOUT
+                            .getLong() * 1000L) {
+                        final PlayerLeaveFungeonEvent event = new PlayerLeaveFungeonEvent(player, null, this,
+                                LeaveCause.OUT_OF_AREA);
+                        Main.getInstance().getServer().getPluginManager().callEvent(event);
+                        kickPlayer(player);
+                        ooaPlayers.remove(player);
+                    }
+                } else if (joinedPlayers.contains(player)
+                        && LocationUtils.isInRegion(areaP1, areaP2, player.getLocation())) {
+                    ooaPlayers.remove(player);
+                }
+            }
+        }
+
+    }
+
     public void fungeonTick() {
         if (getStatus() != Status.PLAYING) {
             nextWaveTimer = Config.NO_ENEMIES_WAVE_INTERVAL.getInt();
@@ -217,6 +303,10 @@ public class Fungeon {
                 forceResetAll();
                 e.printStackTrace();
             }
+        }
+        if (joinedPlayers.size() == 0) {
+            lose();
+            return;
         }
         if (currentWave != 0 && getEnemiesLeft().size() > 0) {
             nextWaveTimer = Config.NO_ENEMIES_WAVE_INTERVAL.getInt();
@@ -242,9 +332,12 @@ public class Fungeon {
                         continue;
                     }
                     final Player randomPlayer = joinedPlayers.get(new Random().nextInt(joinedPlayers.size()));
+                    Location spawnLocation = randomPlayer.getLocation();
+                    if (!LocationUtils.isInRegion(areaP1, areaP2, spawnLocation)) {
+                        spawnLocation = startPoint;
+                    }
                     command = MessageFormat.format(command, randomPlayer.getName(), randomPlayer.getWorld().getName(),
-                            randomPlayer.getLocation().getBlockX(), randomPlayer.getLocation().getBlockY(),
-                            randomPlayer.getLocation().getBlockZ());
+                            spawnLocation.getBlockX(), spawnLocation.getBlockY(), spawnLocation.getBlockZ());
                     Main.log.info(MessageFormat.format("Fungeon ({0}) - executing command: /{1}", toString(), command));
                     Main.getInstance().getServer()
                             .dispatchCommand(Main.getInstance().getServer().getConsoleSender(), command);
@@ -257,6 +350,9 @@ public class Fungeon {
     public void forceResetAll() {
         reset();
         for (final Player player: new ArrayList<Player>(joinedPlayers)) {
+            final PlayerLeaveFungeonEvent event = new PlayerLeaveFungeonEvent(player, null, this,
+                    LeaveCause.SYSTEM_KICK);
+            Main.getInstance().getServer().getPluginManager().callEvent(event);
             player.teleport(lobby);
             player.sendMessage(MessageFormat.format(Lang.FORCE_LEAVE_FUNGEON.toString(), Lang.SYSTEM_WORD.toString()));
             BarAPI.removeBar(player);
@@ -280,17 +376,35 @@ public class Fungeon {
         if (joinedPlayers.contains(player)) {
             return Error.PLAYER_ALREADY_JOINED;
         }
+        if ((cashCost > 0 && !Cost.hasAtLeast(player, cashCost)) || !Cost.hasItems(player.getInventory(), itemCosts)) {
+            for (final ItemStack stack: itemCosts) {
+                if (!(player.getInventory().containsAtLeast(stack, stack.getAmount()))) {
+                    player.sendMessage(MessageFormat.format(Lang.YOU_DONT_HAVE.toString(),
+                            ItemStackUtils.toHumanReadable(stack)));
+                }
+            }
+            if (!Cost.hasAtLeast(player, cashCost)) {
+                player.sendMessage(MessageFormat.format(Lang.YOU_DONT_HAVE_MONEY.toString(), cashCost));
+            }
+            player.sendMessage(MessageFormat.format(Lang.YOU_CANT_AFFORD_COST.toString(), id, toString()));
+            return Error.CANNOT_AFFORD;
+        }
         if (joinedPlayers.size() >= maxPlayers) {
             return Error.PLAYER_LIST_IS_FULL;
         }
-        player.teleport(waitRoom);
-        player.sendMessage(MessageFormat.format(Lang.FUNGEON_JOIN.toString(), toString(), minPlayers,
-                MessageFormat.format(Lang.FUNGEON_PLAYERS_FORMAT.toString(), joinedPlayers.size() + 1, maxPlayers)));
-        for (final Player joinedPlayer: joinedPlayers) {
-            joinedPlayer.sendMessage(MessageFormat.format(Lang.PLAYER_JOINED.toString(), player.getName()));
+        final PlayerJoinFungeonEvent event = new PlayerJoinFungeonEvent(player, this);
+        Main.getInstance().getServer().getPluginManager().callEvent(event);
+        if (!event.isCancelled()) {
+            player.teleport(waitRoom);
+            player.sendMessage(MessageFormat.format(Lang.FUNGEON_JOIN.toString(), toString(), minPlayers,
+                    MessageFormat.format(Lang.FUNGEON_PLAYERS_FORMAT.toString(), joinedPlayers.size() + 1, maxPlayers)));
+            for (final Player joinedPlayer: joinedPlayers) {
+                joinedPlayer.sendMessage(MessageFormat.format(Lang.PLAYER_JOINED.toString(), player.getName()));
+            }
+            joinedPlayers.add(player);
+            return Error.SUCCESS;
         }
-        joinedPlayers.add(player);
-        return Error.SUCCESS;
+        return Error.EVENT_CANCELLED;
     }
 
     public Error playerLeave(Player player) {
@@ -314,15 +428,12 @@ public class Fungeon {
         if (checkValidity() != Validity.VALID) {
             return Error.FUNGEON_NOT_VALID;
         }
-        if (isPlaying) {
-            return Error.FUNGEON_HAS_ALREADY_STARTED;
-        }
         if (!joinedPlayers.contains(player)) {
             return Error.PLAYER_NOT_IN_LIST;
         }
         joinedPlayers.remove(player);
         player.teleport(lobby);
-        player.sendMessage(MessageFormat.format(Lang.FUNGEON_LEAVE.toString(), Lang.SYSTEM_WORD.toString()));
+        player.sendMessage(MessageFormat.format(Lang.FORCE_LEAVE_FUNGEON.toString(), Lang.SYSTEM_WORD.toString()));
         BarAPI.removeBar(player);
         for (final Player joinedPlayer: joinedPlayers) {
             joinedPlayer.sendMessage(MessageFormat.format(Lang.PLAYER_LEFT.toString(), player.getName()));
@@ -330,19 +441,23 @@ public class Fungeon {
         return Error.SUCCESS;
     }
 
-    public Error kickPlayer(Player kicker, Player kickee) {
+    public Error kickPlayer(Player kicker, Player kickee, boolean force) {
         if (checkValidity() != Validity.VALID) {
             return Error.FUNGEON_NOT_VALID;
         }
-        if (joinedPlayers.get(0) != kicker) {
-            return Error.NOT_TEAM_LEADER;
-        }
-        if (isPlaying) {
-            return Error.FUNGEON_HAS_ALREADY_STARTED;
+        if (!force) {
+            if (joinedPlayers.get(0) != kicker) {
+                return Error.NOT_TEAM_LEADER;
+            }
+            if (isPlaying) {
+                return Error.FUNGEON_HAS_ALREADY_STARTED;
+            }
         }
         if (!joinedPlayers.contains(kickee)) {
             return Error.PLAYER_NOT_IN_LIST;
         }
+        final PlayerLeaveFungeonEvent event = new PlayerLeaveFungeonEvent(kickee, kicker, this, LeaveCause.PLAYER_KICK);
+        Main.getInstance().getServer().getPluginManager().callEvent(event);
         joinedPlayers.remove(kickee);
         kickee.teleport(lobby);
         kickee.sendMessage(MessageFormat.format(Lang.FUNGEON_LEAVE.toString(), kicker.getName()));
@@ -361,6 +476,9 @@ public class Fungeon {
             return Error.FUNGEON_HAS_ALREADY_STARTED;
         }
         for (final Player player: new ArrayList<Player>(joinedPlayers)) {
+            final PlayerLeaveFungeonEvent event = new PlayerLeaveFungeonEvent(player, null, this,
+                    LeaveCause.SYSTEM_KICK);
+            Main.getInstance().getServer().getPluginManager().callEvent(event);
             kickPlayer(player);
         }
         return Error.SUCCESS;
@@ -373,12 +491,47 @@ public class Fungeon {
         if (getStatus() == Status.PLAYING) {
             return Error.FUNGEON_HAS_ALREADY_STARTED;
         }
-        if (!force && joinedPlayers.size() < minPlayers) {
-            return Error.NOT_ENOUGH_PLAYERS;
+        final FungeonStartEvent startEvent = new FungeonStartEvent(this, new ArrayList<ItemStack>(itemCosts), cashCost);
+        Main.getInstance().getServer().getPluginManager().callEvent(startEvent);
+        if (startEvent.isCancelled()) {
+            kickAll();
+            return Error.EVENT_CANCELLED;
         }
-        for (final Player player: joinedPlayers) {
-            player.sendMessage(Lang.FUNGEON_START.toString());
-            player.teleport(startPoint);
+        if (!force) {
+            if (joinedPlayers.size() < minPlayers) {
+                return Error.NOT_ENOUGH_PLAYERS;
+            }
+            for (final Player player: new ArrayList<Player>(joinedPlayers)) {
+                if ((startEvent.getCashCost() > 0 && !Cost.hasAtLeast(player, startEvent.getCashCost()))
+                        || !Cost.hasItems(player.getInventory(), startEvent.getCosts())) {
+                    final PlayerLeaveFungeonEvent event = new PlayerLeaveFungeonEvent(player, null, this,
+                            LeaveCause.ITEM_FAIL);
+                    Main.getInstance().getServer().getPluginManager().callEvent(event);
+                    player.sendMessage(MessageFormat.format(Lang.YOU_CANT_AFFORD_COST.toString(), id, toString()));
+                    kickPlayer(player);
+                }
+            }
+            if (joinedPlayers.size() >= minPlayers) {
+                for (final Player player: new ArrayList<Player>(joinedPlayers)) {
+                    if ((startEvent.getCashCost() > 0 && !Cost.chargeMoney(player, startEvent.getCashCost()))
+                            || !Cost.chargeItems(player.getInventory(), startEvent.getCosts())) {
+                        final PlayerLeaveFungeonEvent event = new PlayerLeaveFungeonEvent(player, null, this,
+                                LeaveCause.ITEM_FAIL);
+                        Main.getInstance().getServer().getPluginManager().callEvent(event);
+                        player.sendMessage(MessageFormat.format(Lang.YOU_CANT_AFFORD_COST.toString(), id, toString()));
+                        kickPlayer(player);
+                    } else {
+                        player.sendMessage(Lang.FUNGEON_START.toString());
+                        player.teleport(startPoint);
+                    }
+                }
+            } else {
+                for (final Player player: joinedPlayers) {
+                    player.sendMessage(Lang.FUNGEON_PLAYERS_NOT_ENOUGH.toString());
+                }
+                kickAll();
+                return Error.NOT_ENOUGH_PLAYERS;
+            }
         }
         isPlaying = true;
         return Error.SUCCESS;
@@ -388,7 +541,8 @@ public class Fungeon {
         if (getStatus() != Status.PLAYING) {
             return Error.FUNGEON_HAS_NOT_STARTED;
         }
-        isPlaying = false;
+        reset();
+        final Fungeon fungeon = this;
         new BukkitRunnable() {
             @Override
             public void run() {
@@ -398,17 +552,26 @@ public class Fungeon {
                     new BukkitRunnable() {
                         @Override
                         public void run() {
-                            reset();
+                            final FungeonEndEvent winEvent = new FungeonEndEvent(fungeon, itemPrizes, cashPrize);
+                            Main.getInstance().getServer().getPluginManager().callEvent(winEvent);
                             for (final Player player: new ArrayList<Player>(joinedPlayers)) {
+                                final PlayerLeaveFungeonEvent event = new PlayerLeaveFungeonEvent(player, null,
+                                        fungeon, LeaveCause.GAME_END);
+                                Main.getInstance().getServer().getPluginManager().callEvent(event);
                                 player.sendMessage(Lang.YOU_WIN.toString());
                                 playerLeave(player);
-                                Fungeon.awardPlayer(player, itemPrizes);
-                                Fungeon.awardPlayer(player, cashPrize);
+                                Fungeon.awardPlayer(player, winEvent.getPrizes());
+                                Fungeon.awardPlayer(player, winEvent.getCashPrize());
                             }
                         }
                     }.runTask(Main.getInstance());
                 } catch (final SQLException e) {
+                    final FungeonEndEvent winEvent = new FungeonEndEvent(fungeon, null, null);
+                    Main.getInstance().getServer().getPluginManager().callEvent(winEvent);
                     for (final Player player: new ArrayList<Player>(joinedPlayers)) {
+                        final PlayerLeaveFungeonEvent event = new PlayerLeaveFungeonEvent(player, null, fungeon,
+                                LeaveCause.SYSTEM_KICK);
+                        Main.getInstance().getServer().getPluginManager().callEvent(event);
                         playerLeave(player);
                         player.sendMessage(Lang.DB_EXCEPTION.toString());
                     }
@@ -423,9 +586,12 @@ public class Fungeon {
         if (getStatus() != Status.PLAYING) {
             return Error.FUNGEON_HAS_NOT_STARTED;
         }
-        isPlaying = false;
         reset();
+        final FungeonEndEvent loseEvent = new FungeonEndEvent(this, null, null);
+        Main.getInstance().getServer().getPluginManager().callEvent(loseEvent);
         for (final Player player: new ArrayList<Player>(joinedPlayers)) {
+            final PlayerLeaveFungeonEvent event = new PlayerLeaveFungeonEvent(player, null, this, LeaveCause.GAME_END);
+            Main.getInstance().getServer().getPluginManager().callEvent(event);
             player.sendMessage(Lang.YOU_LOSE.toString());
             playerLeave(player);
         }
@@ -437,7 +603,9 @@ public class Fungeon {
             mob.remove();
         }
         waveCommands = null;
+        isPlaying = false;
         currentWave = 0;
+        ooaPlayers.clear();
     }
 
     public ArrayList<Entity> getEnemiesLeft() {
@@ -447,7 +615,7 @@ public class Fungeon {
         }
         for (final Entity mob: startPoint.getWorld().getEntities()) {
             if ((mob instanceof Monster || mob instanceof Animals)
-                    && Fungeon.isInRegion(areaP1, areaP2, mob.getLocation())) {
+                    && LocationUtils.isInRegion(areaP1, areaP2, mob.getLocation())) {
                 enemies.add(mob);
             }
         }
@@ -474,7 +642,10 @@ public class Fungeon {
         if (name.equalsIgnoreCase("")) {
             return Validity.FUNGEON_NAME_IS_EMPTY;
         }
-        if (fungeonTimeLimit == null || fungeonTimeLimit <= 60 || waitRoomTimeLimit == null || waitRoomTimeLimit <= 0) {
+        if (fungeonTimeLimit == null || fungeonTimeLimit <= 0 || waitRoomTimeLimit == null || waitRoomTimeLimit <= 0) {
+            return Validity.DEFAULT_VALUE_FAIL;
+        }
+        if (fungeonTimeLimit < Config.MIN_FUNGEON_TIME_LIMIT_SECONDS.getInt()) {
             return Validity.DEFAULT_VALUE_FAIL;
         }
         if (lobby == null) {
@@ -504,8 +675,11 @@ public class Fungeon {
         if (minPlayers < 1) {
             return Validity.MIN_PLAYERS_IS_LESS_THAN_1;
         }
-        if (!Fungeon.isInRegion(areaP1, areaP2, startPoint)) {
-            return Validity.START_POINT_NOT_IN_AREA;
+        if (!LocationUtils.isInRegion(areaP1, areaP2, startPoint)) {
+            return Validity.START_POINT_NOT_IN_FUNGEON_AREA;
+        }
+        if (cashCost == null || itemCosts == null) {
+            return Validity.COSTS_NOT_READY;
         }
         return Validity.VALID;
     }
@@ -518,14 +692,15 @@ public class Fungeon {
                     final PreparedStatement upStmt = Database.getConn().prepareStatement(
                             "UPDATE `fungeons` SET `fungeon_name` = ?, `time_limit` = ?, "
                                     + "`min_players` = ?, `max_players` = ?, `wait_time` = ?, "
-                                    + "`enabled` = ? WHERE `row_id` = ?");
+                                    + "`enabled` = ?, `respawning` = ? WHERE `row_id` = ?");
                     upStmt.setString(1, name);
                     upStmt.setInt(2, fungeonTimeLimit);
                     upStmt.setInt(3, minPlayers);
                     upStmt.setInt(4, maxPlayers);
                     upStmt.setInt(5, waitRoomTimeLimit);
                     upStmt.setInt(6, enabled ? 1 : 0);
-                    upStmt.setInt(7, id);
+                    upStmt.setInt(7, respawning ? 1 : 0);
+                    upStmt.setInt(8, id);
                     upStmt.execute();
                     upStmt.close();
                 } catch (final SQLException e) {
@@ -588,6 +763,9 @@ public class Fungeon {
         if (location == null) {
             return Validity.SIGN_LOCATION_IS_NULL;
         }
+        if (LocationUtils.isInRegion(areaP1, areaP2, location)) {
+            return Validity.LOCATION_IN_FUNGEON_AREA;
+        }
         if (!(location.getBlock().getState() instanceof Sign)) {
             return Validity.SIGN_LOCATION_HAS_NO_SIGN;
         }
@@ -596,18 +774,24 @@ public class Fungeon {
     }
 
     public Validity setWaitRoom(Location location) {
+        if (LocationUtils.isInRegion(areaP1, areaP2, location)) {
+            return Validity.LOCATION_IN_FUNGEON_AREA;
+        }
         waitRoom = location;
         return Validity.VALID;
     }
 
     public Validity setLobby(Location location) {
+        if (LocationUtils.isInRegion(areaP1, areaP2, location)) {
+            return Validity.LOCATION_IN_FUNGEON_AREA;
+        }
         lobby = location;
         return Validity.VALID;
     }
 
     public Validity setAreaStartPoint(Location p1, Location p2, Location startPt) {
-        if (!Fungeon.isInRegion(p1, p2, startPt)) {
-            return Validity.START_POINT_NOT_IN_AREA;
+        if (!LocationUtils.isInRegion(p1, p2, startPt)) {
+            return Validity.START_POINT_NOT_IN_FUNGEON_AREA;
         }
         areaP1 = p1;
         areaP2 = p2;
@@ -644,7 +828,10 @@ public class Fungeon {
     }
 
     public Validity setFungeonTimeLimit(int sec) {
-        if (sec <= 60) {
+        if (sec <= 0) {
+            return Validity.DEFAULT_VALUE_FAIL;
+        }
+        if (sec < Config.MIN_FUNGEON_TIME_LIMIT_SECONDS.getInt()) {
             return Validity.DEFAULT_VALUE_FAIL;
         }
         fungeonTimeLimit = sec;
@@ -657,6 +844,15 @@ public class Fungeon {
 
     public Validity setEnabled(boolean enabled) {
         this.enabled = enabled;
+        return Validity.VALID;
+    }
+
+    public boolean isRespawning() {
+        return respawning;
+    }
+
+    public Validity setRespawning(boolean respawning) {
+        this.respawning = respawning;
         return Validity.VALID;
     }
 
@@ -710,7 +906,7 @@ public class Fungeon {
     private static void awardPlayer(Player player, ArrayList<ItemStack> itemPrizes) {
         for (final ItemStack itemStack: itemPrizes) {
             ItemStackUtils.giveToPlayerOrDrop(itemStack, player, player.getLocation());
-            player.sendMessage(MessageFormat.format(Lang.YOU_ARE_AWARDED_ITEM.toString(),
+            player.sendMessage(MessageFormat.format(Lang.YOU_HAVE_BEEN_AWARDED_ITEM.toString(),
                     ItemStackUtils.toHumanReadable(itemStack)));
         }
     }
@@ -718,32 +914,10 @@ public class Fungeon {
     private static void awardPlayer(Player player, int cashPrize) {
         if (Main.econ != null) {
             Main.econ.depositPlayer(player, cashPrize);
-            player.sendMessage(MessageFormat.format(Lang.YOU_ARE_AWARDED_MONEY.toString(), cashPrize));
+            player.sendMessage(MessageFormat.format(Lang.YOU_HAVE_BEEN_AWARDED_MONEY.toString(), cashPrize));
         } else {
             player.sendMessage(MessageFormat.format(Lang.ERROR_HOOKING.toString(), "Vault"));
         }
-    }
-
-    public static boolean isInRegion(Location p1, Location p2, Location check) {
-        if (p1.getWorld() != p2.getWorld()) {
-            return false;
-        }
-        if (p1.getWorld() != check.getWorld()) {
-            return false;
-        }
-        if (!((p1.getX() <= check.getX() && check.getX() <= p2.getX()) || (p2.getX() <= check.getX() && check.getX() <= p1
-                .getX()))) {
-            return false;
-        }
-        if (!((p1.getY() <= check.getY() && check.getY() <= p2.getY()) || (p2.getY() <= check.getY() && check.getY() <= p1
-                .getY()))) {
-            return false;
-        }
-        if (!((p1.getZ() <= check.getZ() && check.getZ() <= p2.getZ()) || (p2.getZ() <= check.getZ() && check.getZ() <= p1
-                .getZ()))) {
-            return false;
-        }
-        return true;
     }
 
     public static void loadAllFungeons() throws SQLException {

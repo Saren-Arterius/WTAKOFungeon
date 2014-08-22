@@ -4,8 +4,8 @@ import java.sql.SQLException;
 import java.text.MessageFormat;
 
 import net.wtako.WTAKOFungeon.Main;
+import net.wtako.WTAKOFungeon.Methods.Cost;
 import net.wtako.WTAKOFungeon.Methods.Fungeon;
-import net.wtako.WTAKOFungeon.Methods.Prize;
 import net.wtako.WTAKOFungeon.Utils.Commands;
 import net.wtako.WTAKOFungeon.Utils.ItemStackUtils;
 import net.wtako.WTAKOFungeon.Utils.Lang;
@@ -20,7 +20,7 @@ public class ArgAdd {
 
     public ArgAdd(final CommandSender sender, final String[] args) {
         if (args.length < 3) {
-            sender.sendMessage(MessageFormat.format(Lang.HELP_PRIZE_ADD.toString(),
+            sender.sendMessage(MessageFormat.format(Lang.HELP_COST_ADD.toString(),
                     Commands.joinArgsInUse(args, args.length)));
             return;
         }
@@ -28,7 +28,7 @@ public class ArgAdd {
         try {
             fungeonID = Integer.parseInt(args[2]);
         } catch (final NumberFormatException e) {
-            sender.sendMessage(MessageFormat.format(Lang.HELP_PRIZE_ADD.toString(), Commands.joinArgsInUse(args, 2)));
+            sender.sendMessage(MessageFormat.format(Lang.HELP_COST_ADD.toString(), Commands.joinArgsInUse(args, 2)));
             return;
         }
         final Fungeon fungeon = Fungeon.getAllFungeons().get(fungeonID);
@@ -43,10 +43,11 @@ public class ArgAdd {
                     Integer money;
                     try {
                         money = Integer.parseInt(args[3]);
-                        sender.sendMessage(MessageFormat.format(Lang.CASH_PRIZE_ADDED.toString(), money,
-                                fungeon.toString(), Prize.addCashPrize(fungeonID, money)));
+                        sender.sendMessage(MessageFormat.format(Lang.CASH_COST_ADDED.toString(), money,
+                                fungeon.toString(), Cost.addCashCost(fungeonID, money)));
+                        fungeon.updateCosts();
                     } catch (final NumberFormatException e) {
-                        sender.sendMessage(MessageFormat.format(Lang.HELP_PRIZE_ADD.toString(),
+                        sender.sendMessage(MessageFormat.format(Lang.HELP_COST_ADD.toString(),
                                 Commands.joinArgsInUse(args, 3)));
                     } catch (final SQLException e) {
                         sender.sendMessage(Lang.DB_EXCEPTION.toString());
@@ -59,9 +60,10 @@ public class ArgAdd {
                             sender.sendMessage(Lang.CANNOT_ADD_AIR.toString());
                             return;
                         }
-                        sender.sendMessage(MessageFormat.format(Lang.ITEM_PRIZE_ADDED.toString(),
+                        sender.sendMessage(MessageFormat.format(Lang.ITEM_COST_ADDED.toString(),
                                 ItemStackUtils.toHumanReadable(item), fungeon.toString(),
-                                Prize.addItemPrize(fungeonID, item)));
+                                Cost.addItemCost(fungeonID, item)));
+                        fungeon.updateCosts();
                     } catch (final SQLException e) {
                         sender.sendMessage(Lang.DB_EXCEPTION.toString());
                         e.printStackTrace();

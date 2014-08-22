@@ -19,6 +19,7 @@ public class FungeonScheduler extends BukkitRunnable {
         for (final Fungeon fungeon: Fungeon.getValidFungeons().values()) {
             fungeon.fungeonTick();
             fungeon.waitingRoomTick();
+            fungeon.checkPlayerLocations();
             fungeon.updateSign();
             fungeon.updatePlayerBars();
         }

@@ -19,13 +19,29 @@ public enum Lang {
     COMMAND_LIST_FUNGEON("Command invocations for fungeon &f(&f{0}&f):"),
     COMMAND_ADDED("&aSuccessfully added command ({0}) for fungeon &f(&f{1}&f)&a as command ID {2}."),
     NO_SUCH_A_COMMAND("&eThere is no such a command where ID is {0}."),
+    PLAYER_NOT_FOUND("&eCould not find player <&f{0}&e>."),
+    PLAYER_NOT_IN_FUNGEON("&ePlayer <&f{0}&e> is not in any fungeons."),
 
+    COST_LIST_FUNGEON("Cost list for fungeon &f(&f{0}&f):"),
+    CASH_COST_ADDED("&aSuccessfully added cash cost (${0}) for fungeon &f(&f{1}&f)&a as cost ID {2}."),
+    ITEM_COST_ADDED("&aSuccessfully added item cost &f({0}&f)&a for fungeon &f(&f{1}&f)&a as cost ID {2}."),
+    NO_SUCH_A_ITEM_COST("&eThere is no such a item cost where ID is {0}."),
+    YOU_HAVE("&aYou own at least {0}."),
+    YOU_DONT_HAVE("&cYou do not own at least {0}."),
+    YOU_HAVE_MONEY("&aYou own at least ${0}."),
+    YOU_DONT_HAVE_MONEY("&cYou do not own at least ${0}."),
+    YOU_CANT_AFFORD_COST("&eYou cannot afford the entry cost of fungeon ID {0} &f(&f{1}&f)&e."),
+    YOU_CAN_AFFORD_COST("&eYou can afford the entry cost of fungeon ID {0} &f(&f{1}&f)&e."),
+    YOU_HAVE_BEEN_CHARGED_ITEM("&aYou have been charged: {0}."),
+    YOU_HAVE_BEEN_CHARGED_MONEY("&aYou have been charged ${0}."),
+
+    PRIZE_LIST_FUNGEON("Prize list for fungeon &f(&f{0}&f):"),
     CASH_PRIZE_ADDED("&aSuccessfully added cash prize (${0}) for fungeon &f(&f{1}&f)&a as prize ID {2}."),
     ITEM_PRIZE_ADDED("&aSuccessfully added item prize &f({0}&f)&a for fungeon &f(&f{1}&f)&a as prize ID {2}."),
     NO_SUCH_A_ITEM_PRIZE("&eThere is no such a item prize where ID is {0}."),
     CANNOT_ADD_AIR("&cCannot add air as prize."),
-    YOU_ARE_AWARDED_ITEM("&aYou are awarded the following prize: {0}"),
-    YOU_ARE_AWARDED_MONEY("&aYou are awarded ${0}"),
+    YOU_HAVE_BEEN_AWARDED_ITEM("&aYou have been awarded the following prize: {0}."),
+    YOU_HAVE_BEEN_AWARDED_MONEY("&aYou have been awarded ${0}."),
 
     BAR_WAITING_ROOM_IDLE_FORMAT("Fungeon &f(&f{0}&f): Idle - {1}"),
     BAR_WAITING_ROOM_COUNTDOWN_FORMAT("Fungeon &f(&f{0}&f): Countdown - {1}"),
@@ -37,14 +53,20 @@ public enum Lang {
     FUNGEON_DOES_NOT_EXIST("&eFungeon ID {0} does not exist."),
     FUNGEON_HAS_NO_WAVES("&cFungeon has no enemy waves."),
 
-    PRIZE_LIST_FUNGEON("Prize list for fungeon &f(&f{0}&f):"),
     NO_FUNGEON_TO_DISPLAY("&eCurrently there is no fungeon to display."),
     FUNGEON_IS_PLAYING("&eThere are players playing this fungeon. Please try again later."),
+    FUNGEON_IS_PLAYING_KICK("&eThis fungeon has started, cannot kick this player."),
+    PLAYER_KICKED("&aSuccessfully kicked <&f{0}&a> from fungeon &f(&f{1}&f)&e."),
+    FUNGEON_PLAYERS_NOT_ENOUGH("&cCannot start fungeon because there are not enough players."),
     FUNGEON_IS_NOT_READY("&eThis fungeon &f(&f{0}&f)&e is currently not ready."),
-    ALREADY_JOINED_FUNGEON("&cYou have already join a fungeon! &f(&f{0}&f)"),
+    ALREADY_JOINED_FUNGEON("&cYou have already joined a fungeon! &f(&f{0}&f)"),
+    NOT_JOINED_FUNGEON("&eYou have not joined a fungeon."),
+    YOU_LEFT_FUNGEON_AREA("&cYou are leaving the fungeon area. "
+            + "Please get back into the area within {0} seconds or you will be kicked."),
 
     FORCE_LEAVE_FUNGEON("&cYou have been forced to leave the fungeon. (Kicked by {0})"),
     YOU_ARE_LEADER_NOW("&aYou are team leader now."),
+    YOU_ARE_NOT_LEADER("&aYou are not team leader, cannot kick player."),
     PLAYER_JOINED("&a{0} has joined the team."),
     PLAYER_LEFT("&a{0} has left the team."),
     FUNGEON_JOIN("&aYou have successfully join a fungeon &f(&f{0}&f)&a. "
@@ -76,14 +98,21 @@ public enum Lang {
     FUNGEON("Fungeon"),
     CASH_PRIZE("Cash prize"),
     ITEM_PRIZE("Item prize"),
+    CASH_COST("Cash cost"),
+    ITEM_COST("Item cost"),
     COMMAND("Command"),
     SYSTEM_WORD("system"),
 
     COMMAND_HELP_SEPERATOR("&6 | &a"),
     COMMAND_ARG_IN_USE("&e{0}&a"),
     SUB_COMMAND("Sub-command: &e{0}"),
+
     HELP_HELP("Type &b/" + Main.getInstance().getProperty("mainCommand") + " &a{0}&f to show help (this message)."),
     HELP_RELOAD("Type &b/" + Main.getInstance().getProperty("mainCommand") + " &a{0}&f to reload the plugin."),
+    HELP_KICK("Type &b/" + Main.getInstance().getProperty("mainCommand")
+            + " &a{0}&f &a<player name>&f to kick a player."),
+    HELP_LEAVE("Type &b/" + Main.getInstance().getProperty("mainCommand") + " &a{0}&f to leave the fungeon."),
+
     HELP_PRIZE("Type &b/" + Main.getInstance().getProperty("mainCommand") + " &a{0}&f to manage fungeon prizes."),
     HELP_PRIZE_ADD("Type &b/" + Main.getInstance().getProperty("mainCommand")
             + " &a{0} &a<fungeon ID> [Cash]&f to add a prize to a fungeon."),
@@ -95,6 +124,19 @@ public enum Lang {
             + " &a{0} &a<fungeon ID>&f to delete all prizes for a fungeon."),
     HELP_PRIZE_LIST("Type &b/" + Main.getInstance().getProperty("mainCommand")
             + " &a{0} &a<fungeon ID>&f to view all prizes of a fungeon."),
+
+    HELP_COST("Type &b/" + Main.getInstance().getProperty("mainCommand") + " &a{0}&f to manage fungeon entry cost."),
+    HELP_COST_ADD("Type &b/" + Main.getInstance().getProperty("mainCommand")
+            + " &a{0} &a<fungeon ID> [Cash]&f to add an entry cost to a fungeon."),
+    HELP_COST_HAS("Type &b/" + Main.getInstance().getProperty("mainCommand")
+            + " &a{0} &a<fungeon ID>&f to see whether you can afford the entry cost."),
+    HELP_COST_DEL("Type &b/" + Main.getInstance().getProperty("mainCommand")
+            + " &a{0} &a<prize ID>&f to delete an existing entry cost."),
+    HELP_COST_CLEAR("Type &b/" + Main.getInstance().getProperty("mainCommand")
+            + " &a{0} &a<fungeon ID>&f to delete all entry cost for a fungeon."),
+    HELP_COST_LIST("Type &b/" + Main.getInstance().getProperty("mainCommand")
+            + " &a{0} &a<fungeon ID>&f to view all entry cost of a fungeon."),
+
     HELP_COMMAND("Type &b/" + Main.getInstance().getProperty("mainCommand")
             + " &a{0}&f to manage fungeon command invocations."),
     HELP_COMMAND_ADD("Type &b/" + Main.getInstance().getProperty("mainCommand")
@@ -105,6 +147,7 @@ public enum Lang {
             + " &a{0} &a<fungeon ID>&f to delete all command invocations for a fungeon."),
     HELP_COMMAND_LIST("Type &b/" + Main.getInstance().getProperty("mainCommand")
             + " &a{0} &a<fungeon ID>&f to view command invocations of a fungeon."),
+
     HELP_FUNGEON("Type &b/" + Main.getInstance().getProperty("mainCommand") + " &a{0}&f to manage fungeons."),
     HELP_FUNGEON_ADD("Type &b/" + Main.getInstance().getProperty("mainCommand")
             + " &a{0} &a<fungeon name>&f to add a new fungeon."),
@@ -115,6 +158,7 @@ public enum Lang {
     HELP_FUNGEON_LIST("Type &b/" + Main.getInstance().getProperty("mainCommand") + " &a{0}&f to view all fungeons."),
     HELP_FUNGEON_LIST_CONFIGS("Type &b/" + Main.getInstance().getProperty("mainCommand")
             + " &a{0}&f to view all config values of a fungeon."),
+
     NO_PERMISSION_HELP(" (&cno permission&f)"),
     PLUGIN_RELOADED("&aPlugin reloaded."),
     NO_PERMISSION_COMMAND("&cYou are not allowed to use this command."),

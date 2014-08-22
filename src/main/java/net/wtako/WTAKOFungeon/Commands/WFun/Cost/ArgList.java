@@ -20,7 +20,7 @@ public class ArgList {
 
     public ArgList(final CommandSender sender, String[] args) {
         if (args.length < 3) {
-            sender.sendMessage(MessageFormat.format(Lang.HELP_PRIZE_LIST.toString(),
+            sender.sendMessage(MessageFormat.format(Lang.HELP_COST_LIST.toString(),
                     Commands.joinArgsInUse(args, args.length)));
             return;
         }
@@ -28,7 +28,7 @@ public class ArgList {
         try {
             fungeonID = Integer.parseInt(args[2]);
         } catch (final NumberFormatException e) {
-            sender.sendMessage(MessageFormat.format(Lang.HELP_PRIZE_LIST.toString(), Commands.joinArgsInUse(args, 2)));
+            sender.sendMessage(MessageFormat.format(Lang.HELP_COST_LIST.toString(), Commands.joinArgsInUse(args, 2)));
             return;
         }
         final Fungeon fungeon = Fungeon.getAllFungeons().get(fungeonID);
@@ -40,10 +40,10 @@ public class ArgList {
             @Override
             public void run() {
                 try {
-                    sender.sendMessage(MessageFormat.format(Lang.PRIZE_LIST_FUNGEON.toString(), fungeon.toString()));
+                    sender.sendMessage(MessageFormat.format(Lang.COST_LIST_FUNGEON.toString(), fungeon.toString()));
                     int counter = 0;
                     PreparedStatement selStmt = Database.getConn().prepareStatement(
-                            "SELECT * FROM prizes WHERE fungeon_id = ? AND item_json IS NOT NULL");
+                            "SELECT * FROM costs WHERE fungeon_id = ? AND item_json IS NOT NULL");
                     selStmt.setInt(1, fungeonID);
                     ResultSet result = selStmt.executeQuery();
                     while (result.next()) {
@@ -54,21 +54,21 @@ public class ArgList {
                     result.close();
                     selStmt.close();
                     sender.sendMessage(MessageFormat.format(Lang.LIST_TOTAL.toString(), counter));
-                    sender.sendMessage(MessageFormat.format("{0}:", Lang.CASH_PRIZE.toString()));
+                    sender.sendMessage(MessageFormat.format("{0}:", Lang.CASH_COST.toString()));
                     counter = 0;
-                    int cashPrize = 0;
+                    int cashCost = 0;
                     selStmt = Database.getConn().prepareStatement(
-                            "SELECT * FROM prizes WHERE fungeon_id = ? AND cash_amount >= 0");
+                            "SELECT * FROM costs WHERE fungeon_id = ? AND cash_amount >= 0");
                     selStmt.setInt(1, fungeonID);
                     result = selStmt.executeQuery();
                     while (result.next()) {
-                        cashPrize += result.getInt("cash_amount");
+                        cashCost += result.getInt("cash_amount");
                         sender.sendMessage(MessageFormat.format("{0}. ${1} (ID: {2})", counter++ + 1,
                                 result.getInt("cash_amount"), result.getInt("row_id")));
                     }
                     result.close();
                     selStmt.close();
-                    sender.sendMessage(MessageFormat.format(Lang.LIST_TOTAL.toString(), cashPrize));
+                    sender.sendMessage(MessageFormat.format(Lang.LIST_TOTAL.toString(), cashCost));
                 } catch (final SQLException e) {
                     sender.sendMessage(Lang.DB_EXCEPTION.toString());
                     e.printStackTrace();
