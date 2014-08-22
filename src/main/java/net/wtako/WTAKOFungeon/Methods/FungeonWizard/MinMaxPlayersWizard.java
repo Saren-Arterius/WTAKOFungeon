@@ -20,6 +20,17 @@ public class MinMaxPlayersWizard extends BaseWizard {
         sendMessage();
     }
 
+    public void sendMessage() {
+        if (minPlayers == null) {
+            player.sendMessage("Minimum players?");
+            return;
+        }
+        if (maxPlayers == null) {
+            player.sendMessage("Maximum players?");
+            return;
+        }
+    }
+
     @Override
     public Validity setValue(Object value) throws SQLException {
         try {
@@ -48,17 +59,6 @@ public class MinMaxPlayersWizard extends BaseWizard {
             return Validity.PARSE_FAIL;
         }
 
-    }
-
-    public void sendMessage() {
-        if (minPlayers == null) {
-            player.sendMessage("Minimum players?");
-            return;
-        }
-        if (maxPlayers == null) {
-            player.sendMessage("Maximum players?");
-            return;
-        }
     }
 
 }

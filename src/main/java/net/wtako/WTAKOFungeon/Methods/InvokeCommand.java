@@ -7,22 +7,6 @@ import java.util.ArrayList;
 
 public class InvokeCommand {
 
-    public static void deleteCommand(int commandID) throws SQLException {
-        final PreparedStatement delStmt = Database.getConn().prepareStatement(
-                "DELETE FROM invoke_commands WHERE row_id = ?");
-        delStmt.setInt(1, commandID);
-        delStmt.execute();
-        delStmt.close();
-    }
-
-    public static void deleteAllCommands(int fungeonID) throws SQLException {
-        final PreparedStatement delStmt = Database.getConn().prepareStatement(
-                "DELETE FROM invoke_commands WHERE fungeon_id = ?");
-        delStmt.setInt(1, fungeonID);
-        delStmt.execute();
-        delStmt.close();
-    }
-
     public static int addCommand(int fungeonID, String command) throws SQLException {
         final PreparedStatement insStmt = Database.getConn().prepareStatement(
                 "INSERT INTO invoke_commands (`fungeon_id`, `command`) VALUES (?, ?)");
@@ -34,6 +18,22 @@ public class InvokeCommand {
         result.close();
         insStmt.close();
         return rowID;
+    }
+
+    public static void deleteAllCommands(int fungeonID) throws SQLException {
+        final PreparedStatement delStmt = Database.getConn().prepareStatement(
+                "DELETE FROM invoke_commands WHERE fungeon_id = ?");
+        delStmt.setInt(1, fungeonID);
+        delStmt.execute();
+        delStmt.close();
+    }
+
+    public static void deleteCommand(int commandID) throws SQLException {
+        final PreparedStatement delStmt = Database.getConn().prepareStatement(
+                "DELETE FROM invoke_commands WHERE row_id = ?");
+        delStmt.setInt(1, commandID);
+        delStmt.execute();
+        delStmt.close();
     }
 
     public static ArrayList<String> getCommands(int fungeonID) throws SQLException {

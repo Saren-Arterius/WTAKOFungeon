@@ -4,10 +4,10 @@ public interface BaseCommands {
 
     public String getHelpMessage();
 
-    public String name();
+    public String getRequiredPermission();
 
     public Class<?> getTargetClass();
 
-    public String getRequiredPermission();
+    public String name();
 
 }

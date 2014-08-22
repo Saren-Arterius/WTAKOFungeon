@@ -23,8 +23,21 @@ public class FungeonStartEvent extends Event implements Cancellable {
         setCashCost(cashCost);
     }
 
+    public Integer getCashCost() {
+        return cashCost;
+    }
+
+    public ArrayList<ItemStack> getCosts() {
+        return costs;
+    }
+
     public Fungeon getFungeon() {
         return fungeon;
+    }
+
+    @Override
+    public HandlerList getHandlers() {
+        return FungeonStartEvent.handlers;
     }
 
     @Override
@@ -35,19 +48,6 @@ public class FungeonStartEvent extends Event implements Cancellable {
     @Override
     public void setCancelled(boolean cancelled) {
         this.cancelled = cancelled;
-    }
-
-    @Override
-    public HandlerList getHandlers() {
-        return FungeonStartEvent.handlers;
-    }
-
-    public ArrayList<ItemStack> getCosts() {
-        return costs;
-    }
-
-    public Integer getCashCost() {
-        return cashCost;
     }
 
     public void setCashCost(Integer cashCost) {

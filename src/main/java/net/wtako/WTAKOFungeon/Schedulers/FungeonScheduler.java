@@ -9,6 +9,10 @@ public class FungeonScheduler extends BukkitRunnable {
 
     private static FungeonScheduler instance;
 
+    public static FungeonScheduler getInstance() {
+        return FungeonScheduler.instance;
+    }
+
     public FungeonScheduler() {
         FungeonScheduler.instance = this;
         runTaskTimer(Main.getInstance(), 0L, 20L);
@@ -23,10 +27,6 @@ public class FungeonScheduler extends BukkitRunnable {
             fungeon.updateSign();
             fungeon.updatePlayerBars();
         }
-    }
-
-    public static FungeonScheduler getInstance() {
-        return FungeonScheduler.instance;
     }
 
 }

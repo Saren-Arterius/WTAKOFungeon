@@ -22,12 +22,8 @@ public class PlayerLeaveFungeonEvent extends Event {
         this.cause = cause;
     }
 
-    public Player getPlayer() {
-        return player;
-    }
-
-    public Player getKicker() {
-        return kicker;
+    public LeaveCause getCause() {
+        return cause;
     }
 
     public Fungeon getFungeon() {
@@ -39,8 +35,12 @@ public class PlayerLeaveFungeonEvent extends Event {
         return PlayerLeaveFungeonEvent.handlers;
     }
 
-    public LeaveCause getCause() {
-        return cause;
+    public Player getKicker() {
+        return kicker;
+    }
+
+    public Player getPlayer() {
+        return player;
     }
 
 }

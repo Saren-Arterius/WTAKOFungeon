@@ -20,6 +20,18 @@ public class AreaStartWizard extends BaseWizard {
         sendMessage();
     }
 
+    public void sendMessage() {
+        if (areaP1 == null) {
+            player.sendMessage("Area point 1?");
+            return;
+        }
+        if (areaP2 == null) {
+            player.sendMessage("Area point 2?");
+            return;
+        }
+        player.sendMessage("Fungeon start point?");
+    }
+
     @Override
     public Validity setValue(Object value) throws SQLException {
         final Location location = (Location) value;
@@ -42,18 +54,6 @@ public class AreaStartWizard extends BaseWizard {
             sendMessage();
         }
         return result;
-    }
-
-    public void sendMessage() {
-        if (areaP1 == null) {
-            player.sendMessage("Area point 1?");
-            return;
-        }
-        if (areaP2 == null) {
-            player.sendMessage("Area point 2?");
-            return;
-        }
-        player.sendMessage("Fungeon start point?");
     }
 
 }

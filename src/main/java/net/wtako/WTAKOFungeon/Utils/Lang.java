@@ -170,6 +170,16 @@ public enum Lang {
     private static YamlConfiguration LANG;
 
     /**
+     * Set the {@code YamlConfiguration} to use.
+     * 
+     * @param config
+     *            The config to set.
+     */
+    public static void setFile(YamlConfiguration config) {
+        Lang.LANG = config;
+    }
+
+    /**
      * Lang enum constructor.
      * 
      * @param path
@@ -180,24 +190,6 @@ public enum Lang {
     Lang(String start) {
         path = name().toLowerCase().replace("_", "-");
         def = start;
-    }
-
-    /**
-     * Set the {@code YamlConfiguration} to use.
-     * 
-     * @param config
-     *            The config to set.
-     */
-    public static void setFile(YamlConfiguration config) {
-        Lang.LANG = config;
-    }
-
-    @Override
-    public String toString() {
-        if (this == TITLE) {
-            return ChatColor.translateAlternateColorCodes('&', Lang.LANG.getString(path, def)) + " ";
-        }
-        return ChatColor.translateAlternateColorCodes('&', Lang.LANG.getString(path, def));
     }
 
     /**
@@ -216,5 +208,13 @@ public enum Lang {
      */
     public String getPath() {
         return path;
+    }
+
+    @Override
+    public String toString() {
+        if (this == TITLE) {
+            return ChatColor.translateAlternateColorCodes('&', Lang.LANG.getString(path, def)) + " ";
+        }
+        return ChatColor.translateAlternateColorCodes('&', Lang.LANG.getString(path, def));
     }
 }

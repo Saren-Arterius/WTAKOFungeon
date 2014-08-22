@@ -15,6 +15,23 @@ import org.bukkit.event.player.PlayerInteractEvent;
 public class FungeonSignListener implements Listener {
 
     @EventHandler
+    public void onFungeonSignBreak(BlockBreakEvent event) {
+        final Fungeon fungeon = Fungeon.getFungeonFromSignBlock(event.getBlock());
+        if (fungeon == null) {
+            return;
+        }
+        if (!event.getPlayer().hasPermission(Main.artifactId + ".admin")) {
+            event.setCancelled(true);
+            return;
+        }
+        if (fungeon.getStatus() == Fungeon.Status.PLAYING) {
+            event.getPlayer().sendMessage(Lang.FUNGEON_IS_PLAYING.toString());
+            event.setCancelled(true);
+            return;
+        }
+    }
+
+    @EventHandler
     public void onFungeonSignRightClick(PlayerInteractEvent event) {
         if (event.getAction() != Action.RIGHT_CLICK_BLOCK) {
             return;
@@ -35,22 +52,5 @@ public class FungeonSignListener implements Listener {
             return;
         }
         fungeon.joinPlayer(event.getPlayer());
-    }
-
-    @EventHandler
-    public void onFungeonSignBreak(BlockBreakEvent event) {
-        final Fungeon fungeon = Fungeon.getFungeonFromSignBlock(event.getBlock());
-        if (fungeon == null) {
-            return;
-        }
-        if (!event.getPlayer().hasPermission(Main.artifactId + ".admin")) {
-            event.setCancelled(true);
-            return;
-        }
-        if (fungeon.getStatus() == Fungeon.Status.PLAYING) {
-            event.getPlayer().sendMessage(Lang.FUNGEON_IS_PLAYING.toString());
-            event.setCancelled(true);
-            return;
-        }
     }
 }

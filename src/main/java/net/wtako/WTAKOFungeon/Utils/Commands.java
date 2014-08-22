@@ -33,31 +33,6 @@ public enum Commands implements BaseCommands {
     COMMAND(Lang.HELP_COMMAND.toString(), SubArgCommand.class, Main.artifactId + ".admin"),
     RELOAD(Lang.HELP_RELOAD.toString(), ArgReload.class, Main.artifactId + ".reload");
 
-    private String   helpMessage;
-    private Class<?> targetClass;
-    private String   permission;
-
-    private Commands(String helpMessage, Class<?> targetClass, String permission) {
-        this.helpMessage = helpMessage;
-        this.targetClass = targetClass;
-        this.permission = permission;
-    }
-
-    @Override
-    public String getHelpMessage() {
-        return helpMessage;
-    }
-
-    @Override
-    public Class<?> getTargetClass() {
-        return targetClass;
-    }
-
-    @Override
-    public String getRequiredPermission() {
-        return permission;
-    }
-
     public static String joinArgsInUse(String[] args, int level) {
         String argsMessage = "";
         for (int i = 0; i < level; i++) {
@@ -123,5 +98,32 @@ public enum Commands implements BaseCommands {
                 sender.sendMessage(messages.toArray(new String[messages.size()]));
             }
         }.runTaskAsynchronously(Main.getInstance());
+    }
+
+    private String   helpMessage;
+
+    private Class<?> targetClass;
+
+    private String   permission;
+
+    private Commands(String helpMessage, Class<?> targetClass, String permission) {
+        this.helpMessage = helpMessage;
+        this.targetClass = targetClass;
+        this.permission = permission;
+    }
+
+    @Override
+    public String getHelpMessage() {
+        return helpMessage;
+    }
+
+    @Override
+    public String getRequiredPermission() {
+        return permission;
+    }
+
+    @Override
+    public Class<?> getTargetClass() {
+        return targetClass;
     }
 }

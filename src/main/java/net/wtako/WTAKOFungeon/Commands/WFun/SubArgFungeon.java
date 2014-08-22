@@ -41,13 +41,13 @@ public class SubArgFungeon {
         }
 
         @Override
-        public Class<?> getTargetClass() {
-            return targetClass;
+        public String getRequiredPermission() {
+            return permission;
         }
 
         @Override
-        public String getRequiredPermission() {
-            return permission;
+        public Class<?> getTargetClass() {
+            return targetClass;
         }
     }
 

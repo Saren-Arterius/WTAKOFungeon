@@ -8,6 +8,8 @@ import org.bukkit.configuration.file.FileConfiguration;
 
 public enum Config {
     MIN_FUNGEON_TIME_LIMIT_SECONDS("fungeon.min.fungeon-time-limit-seconds", 60),
+    MAX_KICKS_PER_PERSON_AND_ROUND("fungeon.kick.max-kicks-per-person-and-round", 3),
+    KICKED_DELAY_SECONDS("fungeon.kick.kicked-delay-seconds", 60),
     DEFAULT_FUNGEON_TIME_LIMIT_SECONDS("fungeon.default.fungeon-time-limit-seconds", 900),
     DEFAULT_MIN_PLAYERS("fungeon.default.min-players", 3),
     DEFAULT_MAX_PLAYERS("fungeon.default.max-players", 8),
@@ -16,7 +18,18 @@ public enum Config {
     OUT_OF_AREA_KICK_TIMEOUT("fungeon.out-of-area-kick-timeout", 10),
     PLUGIN_ENABLED("system.plugin-enabled", true);
 
+    public static void saveAll() {
+        final FileConfiguration config = Main.getInstance().getConfig();
+        for (final Config setting: Config.values()) {
+            if (!config.contains(setting.getPath())) {
+                config.set(setting.getPath(), setting.getValue());
+            }
+        }
+        Main.getInstance().saveConfig();
+    }
+
     private String path;
+
     private Object value;
 
     Config(String path, Object var) {
@@ -29,16 +42,12 @@ public enum Config {
         }
     }
 
-    public Object getValue() {
-        return value;
-    }
-
     public boolean getBoolean() {
         return (boolean) value;
     }
 
-    public String getString() {
-        return (String) value;
+    public double getDouble() {
+        return (double) value;
     }
 
     public int getInt() {
@@ -49,17 +58,12 @@ public enum Config {
         return Integer.valueOf(getInt()).longValue();
     }
 
-    public double getDouble() {
-        return (double) value;
-    }
-
     public String getPath() {
         return path;
     }
 
-    @SuppressWarnings("unchecked")
-    public List<Object> getValues() {
-        return (List<Object>) value;
+    public String getString() {
+        return (String) value;
     }
 
     @SuppressWarnings("unchecked")
@@ -67,14 +71,13 @@ public enum Config {
         return (List<String>) value;
     }
 
-    public static void saveAll() {
-        final FileConfiguration config = Main.getInstance().getConfig();
-        for (final Config setting: Config.values()) {
-            if (!config.contains(setting.getPath())) {
-                config.set(setting.getPath(), setting.getValue());
-            }
-        }
-        Main.getInstance().saveConfig();
+    public Object getValue() {
+        return value;
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<Object> getValues() {
+        return (List<Object>) value;
     }
 
 }

@@ -8,17 +8,17 @@ import org.bukkit.inventory.ItemStack;
 
 public class ItemStackUtils {
 
-    public static String toHumanReadable(ItemStack stack) {
-        return MessageFormat.format(Lang.ITEM_PRINT_FORMAT.toString(), stack.getAmount(), stack.hasItemMeta()
-                && !stack.getItemMeta().getDisplayName().equalsIgnoreCase("") ? stack.getItemMeta().getDisplayName()
-                : stack.getType().name());
-    }
-
     public static void giveToPlayerOrDrop(ItemStack itemStack, Player player, Location location) {
         if (player.getInventory().firstEmpty() == -1) {
             player.getWorld().dropItemNaturally(location, itemStack);
         } else {
             player.getInventory().addItem(itemStack);
         }
+    }
+
+    public static String toHumanReadable(ItemStack stack) {
+        return MessageFormat.format(Lang.ITEM_PRINT_FORMAT.toString(), stack.getAmount(), stack.hasItemMeta()
+                && !stack.getItemMeta().getDisplayName().equalsIgnoreCase("") ? stack.getItemMeta().getDisplayName()
+                : stack.getType().name());
     }
 }

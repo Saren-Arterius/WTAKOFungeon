@@ -13,20 +13,14 @@ public class ArgLeave {
 
     public ArgLeave(final CommandSender sender, String[] args) {
         final Player player = (Player) sender;
-        boolean hasLeave = false;
-        for (final Fungeon fungeon: Fungeon.getValidFungeons().values()) {
-            if (fungeon.getJoinedPlayers().contains(player)) {
-                final PlayerLeaveFungeonEvent event = new PlayerLeaveFungeonEvent(player, null, fungeon,
-                        LeaveCause.COMMAND);
-                Main.getInstance().getServer().getPluginManager().callEvent(event);
-                fungeon.playerLeave(player);
-                hasLeave = true;
-                break;
-            }
-        }
-        if (!hasLeave) {
+        final Fungeon fungeon = Fungeon.getJoinedFungeon(player);
+        if (fungeon == null) {
             player.sendMessage(Lang.NOT_JOINED_FUNGEON.toString());
+            return;
         }
+        final PlayerLeaveFungeonEvent event = new PlayerLeaveFungeonEvent(player, null, fungeon, LeaveCause.COMMAND);
+        Main.getInstance().getServer().getPluginManager().callEvent(event);
+        fungeon.playerLeave(player);
     }
 
 }

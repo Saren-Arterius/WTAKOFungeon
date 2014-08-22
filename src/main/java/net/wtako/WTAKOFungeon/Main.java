@@ -76,6 +76,29 @@ public final class Main extends JavaPlugin {
         }
     }
 
+    /**
+     * Gets the messages.yml config.
+     * 
+     * @return The messages.yml config.
+     */
+    public YamlConfiguration getLang() {
+        return Main.LANG;
+    }
+
+    /**
+     * Get the messages.yml file.
+     * 
+     * @return The messages.yml file.
+     */
+    public File getLangFile() {
+        return Main.LANG_FILE;
+    }
+
+    public String getProperty(String key) {
+        final YamlConfiguration spawnConfig = YamlConfiguration.loadConfiguration(getResource("plugin.yml"));
+        return spawnConfig.getString(key);
+    }
+
     public void loadLang() {
         final File lang = new File(getDataFolder(), "messages.yml");
         if (!lang.exists()) {
@@ -114,29 +137,6 @@ public final class Main extends JavaPlugin {
                     + getProperty("author") + ".");
             e.printStackTrace();
         }
-    }
-
-    /**
-     * Gets the messages.yml config.
-     * 
-     * @return The messages.yml config.
-     */
-    public YamlConfiguration getLang() {
-        return Main.LANG;
-    }
-
-    /**
-     * Get the messages.yml file.
-     * 
-     * @return The messages.yml file.
-     */
-    public File getLangFile() {
-        return Main.LANG_FILE;
-    }
-
-    public String getProperty(String key) {
-        final YamlConfiguration spawnConfig = YamlConfiguration.loadConfiguration(getResource("plugin.yml"));
-        return spawnConfig.getString(key);
     }
 
     public static Main getInstance() {

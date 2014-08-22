@@ -11,14 +11,6 @@ import org.bukkit.command.CommandSender;
 
 public class CommandWFun implements CommandExecutor {
 
-    @Override
-    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-        if (args.length >= 1) {
-            return callCommand(sender, args, args[0]);
-        }
-        return callCommand(sender, args, "MAIN_COMMAND");
-    }
-
     public boolean callCommand(CommandSender sender, String[] args, String targetCommandName) {
         try {
             final Commands targetCommand = Commands.valueOf(targetCommandName.toUpperCase().replace("-", "_"));
@@ -36,5 +28,13 @@ public class CommandWFun implements CommandExecutor {
             e.printStackTrace();
             return false;
         }
+    }
+
+    @Override
+    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+        if (args.length >= 1) {
+            return callCommand(sender, args, args[0]);
+        }
+        return callCommand(sender, args, "MAIN_COMMAND");
     }
 }

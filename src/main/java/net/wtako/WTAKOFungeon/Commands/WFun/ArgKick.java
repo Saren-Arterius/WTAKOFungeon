@@ -23,28 +23,23 @@ public class ArgKick {
         final Player kickee = Main.getInstance().getServer().getPlayer(args[1]);
         if (kickee == null) {
             kicker.sendMessage(MessageFormat.format(Lang.PLAYER_NOT_FOUND.toString(), args[1]));
+            return;
         }
-        boolean kickeeFound = false;
-        for (final Fungeon fungeon: Fungeon.getValidFungeons().values()) {
-            if (fungeon.getJoinedPlayers().contains(kicker)) {
-                kickeeFound = true;
-                final Error result = fungeon.kickPlayer(kicker, kickee,
-                        kicker.hasPermission(Main.artifactId + ".admin"));
-                if (result == Error.FUNGEON_HAS_ALREADY_STARTED) {
-                    kicker.sendMessage(Lang.FUNGEON_IS_PLAYING_KICK.toString());
-                } else if (result == Error.NOT_TEAM_LEADER) {
-                    kicker.sendMessage(Lang.YOU_ARE_NOT_LEADER.toString());
-                } else if (result == Error.SUCCESS) {
-                    kicker.sendMessage(MessageFormat.format(Lang.PLAYER_KICKED.toString(), kickee.getName(),
-                            fungeon.toString()));
-                } else {
-                    kicker.sendMessage(result.name());
-                }
-                break;
-            }
-        }
-        if (!kickeeFound) {
+
+        final Fungeon fungeon = Fungeon.getJoinedFungeon(kickee);
+        if (fungeon == null) {
             kicker.sendMessage(MessageFormat.format(Lang.PLAYER_NOT_IN_FUNGEON.toString(), kickee.getName()));
+            return;
+        }
+        final Error result = fungeon.kickPlayer(kicker, kickee, kicker.hasPermission(Main.artifactId + ".admin"));
+        if (result == Error.FUNGEON_HAS_ALREADY_STARTED) {
+            kicker.sendMessage(Lang.FUNGEON_IS_PLAYING_KICK.toString());
+        } else if (result == Error.NOT_TEAM_LEADER) {
+            kicker.sendMessage(Lang.YOU_ARE_NOT_LEADER.toString());
+        } else if (result == Error.SUCCESS) {
+            kicker.sendMessage(MessageFormat.format(Lang.PLAYER_KICKED.toString(), kickee.getName(), fungeon.toString()));
+        } else {
+            kicker.sendMessage(result.name());
         }
     }
 

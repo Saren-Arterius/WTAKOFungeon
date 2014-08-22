@@ -32,6 +32,26 @@ public class Database {
         stmt.close();
     }
 
+    private boolean areTablesExist() {
+        try {
+            final Statement cur = conn.createStatement();
+            cur.execute("SELECT * FROM `configs` LIMIT 0");
+            cur.close();
+            return true;
+        } catch (final SQLException ex) {
+            return false;
+        }
+    }
+
+    public void check() throws SQLException {
+        Main.log.info(Lang.TITLE.toString() + "Checking database...");
+        if (!areTablesExist()) {
+            Main.log.info(Lang.TITLE.toString() + "Creating tables...");
+            createTables();
+            Main.log.info(Lang.TITLE.toString() + "Done.");
+        }
+    }
+
     public void createTables() throws SQLException {
         final Statement cur = conn.createStatement();
         String stmt = "CREATE TABLE `fungeons` (" + "`row_id` INTEGER PRIMARY KEY AUTOINCREMENT, "
@@ -56,26 +76,6 @@ public class Database {
         cur.execute("CREATE TABLE `configs` (`config` TEXT PRIMARY KEY, `value` TEXT NULL)");
         cur.close();
         addConfig("database_version", String.valueOf(Database.latestVersion));
-    }
-
-    private boolean areTablesExist() {
-        try {
-            final Statement cur = conn.createStatement();
-            cur.execute("SELECT * FROM `configs` LIMIT 0");
-            cur.close();
-            return true;
-        } catch (final SQLException ex) {
-            return false;
-        }
-    }
-
-    public void check() throws SQLException {
-        Main.log.info(Lang.TITLE.toString() + "Checking database...");
-        if (!areTablesExist()) {
-            Main.log.info(Lang.TITLE.toString() + "Creating tables...");
-            createTables();
-            Main.log.info(Lang.TITLE.toString() + "Done.");
-        }
     }
 
     public static Connection getConn() {

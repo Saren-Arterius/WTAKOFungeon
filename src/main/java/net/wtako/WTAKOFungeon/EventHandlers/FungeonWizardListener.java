@@ -28,14 +28,6 @@ import org.bukkit.event.player.AsyncPlayerChatEvent;
 
 public class FungeonWizardListener implements Listener {
 
-    private static HashMap<Player, BaseWizard> inWizards      = new HashMap<Player, BaseWizard>();
-    private static HashMap<Player, Fungeon>    inStartWizards = new HashMap<Player, Fungeon>();
-
-    public enum WizardType {
-        INPUT,
-        BLOCK_BREAK,
-    }
-
     public enum FungeonConfig {
         AREA_START(WizardType.BLOCK_BREAK, AreaStartWizard.class),
         LOBBY(WizardType.BLOCK_BREAK, LobbyWizard.class),
@@ -47,22 +39,6 @@ public class FungeonWizardListener implements Listener {
         TIME_LIMITS(WizardType.INPUT, TimeLimitsWizard.class),
         MIN_MAX_PLAYERS(WizardType.INPUT, MinMaxPlayersWizard.class);
 
-        private final Class<?>   targetClass;
-        private final WizardType type;
-
-        private FungeonConfig(WizardType type, Class<?> targetClass) {
-            this.type = type;
-            this.targetClass = targetClass;
-        }
-
-        public WizardType getWizardType() {
-            return type;
-        }
-
-        public Class<?> getTargetClass() {
-            return targetClass;
-        }
-
         public static FungeonConfig getConfig(Class<?> targetClass) {
             for (final FungeonConfig config: FungeonConfig.values()) {
                 if (config.getTargetClass() == targetClass) {
@@ -71,6 +47,55 @@ public class FungeonWizardListener implements Listener {
             }
             return null;
         }
+
+        private final Class<?>   targetClass;
+
+        private final WizardType type;
+
+        private FungeonConfig(WizardType type, Class<?> targetClass) {
+            this.type = type;
+            this.targetClass = targetClass;
+        }
+
+        public Class<?> getTargetClass() {
+            return targetClass;
+        }
+
+        public WizardType getWizardType() {
+            return type;
+        }
+    }
+
+    public enum WizardType {
+        INPUT,
+        BLOCK_BREAK,
+    }
+
+    private static HashMap<Player, BaseWizard> inWizards      = new HashMap<Player, BaseWizard>();
+
+    private static HashMap<Player, Fungeon>    inStartWizards = new HashMap<Player, Fungeon>();
+
+    public static HashMap<Player, BaseWizard> getInWizards() {
+        return FungeonWizardListener.inWizards;
+    }
+
+    public static boolean goToWizard(Player player, Fungeon fungeon) {
+        if (FungeonWizardListener.inStartWizards.containsKey(player)
+                || FungeonWizardListener.inWizards.containsKey(player)) {
+            player.sendMessage(Lang.ALREADY_IN_WIZARD.toString());
+            return false;
+        }
+        FungeonWizardListener.inStartWizards.put(player, fungeon);
+        player.sendMessage(MessageFormat.format(Lang.WELCOME_TO_WIZARD.toString(), fungeon.toString()));
+        String msg = "";
+        for (int i = 0; i < FungeonConfig.values().length; i++) {
+            msg += FungeonConfig.values()[i].name().toLowerCase().replace("_", "-");
+            if (i < FungeonConfig.values().length - 1) {
+                msg += ", ";
+            }
+        }
+        player.sendMessage(MessageFormat.format(Lang.AVAILABLE_CONFIGS.toString(), msg));
+        return true;
     }
 
     @EventHandler
@@ -155,29 +180,6 @@ public class FungeonWizardListener implements Listener {
             }
         }
 
-    }
-
-    public static boolean goToWizard(Player player, Fungeon fungeon) {
-        if (FungeonWizardListener.inStartWizards.containsKey(player)
-                || FungeonWizardListener.inWizards.containsKey(player)) {
-            player.sendMessage(Lang.ALREADY_IN_WIZARD.toString());
-            return false;
-        }
-        FungeonWizardListener.inStartWizards.put(player, fungeon);
-        player.sendMessage(MessageFormat.format(Lang.WELCOME_TO_WIZARD.toString(), fungeon.toString()));
-        String msg = "";
-        for (int i = 0; i < FungeonConfig.values().length; i++) {
-            msg += FungeonConfig.values()[i].name().toLowerCase().replace("_", "-");
-            if (i < FungeonConfig.values().length - 1) {
-                msg += ", ";
-            }
-        }
-        player.sendMessage(MessageFormat.format(Lang.AVAILABLE_CONFIGS.toString(), msg));
-        return true;
-    }
-
-    public static HashMap<Player, BaseWizard> getInWizards() {
-        return FungeonWizardListener.inWizards;
     }
 
 }

@@ -21,6 +21,10 @@ public class FungeonEndEvent extends Event {
         this.cashPrize = cashPrize;
     }
 
+    public int getCashPrize() {
+        return cashPrize;
+    }
+
     public Fungeon getFungeon() {
         return fungeon;
     }
@@ -32,10 +36,6 @@ public class FungeonEndEvent extends Event {
 
     public ArrayList<ItemStack> getPrizes() {
         return prizes;
-    }
-
-    public int getCashPrize() {
-        return cashPrize;
     }
 
     public void setCashPrize(int cashPrize) {

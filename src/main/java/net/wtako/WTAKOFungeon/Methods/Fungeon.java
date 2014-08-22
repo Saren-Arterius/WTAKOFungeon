@@ -36,6 +36,8 @@ public class Fungeon {
     private static HashMap<Integer, Fungeon> allFungeons            = new HashMap<Integer, Fungeon>();
     private final ArrayList<Player>          joinedPlayers          = new ArrayList<Player>();
     private final HashMap<Player, Long>      ooaPlayers             = new HashMap<Player, Long>();
+    private final HashMap<Player, Integer>   kickTimes              = new HashMap<Player, Integer>();
+    private final HashMap<Player, Long>      lastKicked             = new HashMap<Player, Long>();
     private boolean                          isPlaying              = false;
     private Integer                          id;
     private boolean                          enabled                = true;
@@ -144,8 +146,11 @@ public class Fungeon {
         FUNGEON_NOT_VALID,
         NOT_TEAM_LEADER,
         CANNOT_AFFORD,
+        CANNOT_KICK_ADMIN,
         EVENT_CANCELLED,
-        SUCCESS
+        KICKED_TOO_MANY_TIMES,
+        JUST_BEEN_KICKED,
+        SUCCESS,
     }
 
     public enum Status {
@@ -392,6 +397,10 @@ public class Fungeon {
         if (joinedPlayers.size() >= maxPlayers) {
             return Error.PLAYER_LIST_IS_FULL;
         }
+        if (lastKicked.containsKey(player)
+                && System.currentTimeMillis() - lastKicked.get(player) < Config.KICKED_DELAY_SECONDS.getLong() * 1000L) {
+            return Error.JUST_BEEN_KICKED;
+        }
         final PlayerJoinFungeonEvent event = new PlayerJoinFungeonEvent(player, this);
         Main.getInstance().getServer().getPluginManager().callEvent(event);
         if (!event.isCancelled()) {
@@ -452,10 +461,22 @@ public class Fungeon {
             if (isPlaying) {
                 return Error.FUNGEON_HAS_ALREADY_STARTED;
             }
+            if (kickee.hasPermission(Main.artifactId + ".admin")) {
+                return Error.CANNOT_KICK_ADMIN;
+            }
+            if (kickTimes.get(kicker) >= Config.MAX_KICKS_PER_PERSON_AND_ROUND.getInt()) {
+                return Error.KICKED_TOO_MANY_TIMES;
+            }
         }
         if (!joinedPlayers.contains(kickee)) {
             return Error.PLAYER_NOT_IN_LIST;
         }
+        if (kickTimes.containsKey(kicker)) {
+            kickTimes.put(kicker, kickTimes.get(kicker) + 1);
+        } else {
+            kickTimes.put(kicker, 1);
+        }
+        lastKicked.put(kickee, System.currentTimeMillis());
         final PlayerLeaveFungeonEvent event = new PlayerLeaveFungeonEvent(kickee, kicker, this, LeaveCause.PLAYER_KICK);
         Main.getInstance().getServer().getPluginManager().callEvent(event);
         joinedPlayers.remove(kickee);
@@ -868,6 +889,10 @@ public class Fungeon {
         return signLocation;
     }
 
+    public Location getStartLocation() {
+        return startPoint;
+    }
+
     public Validity setName(String name) {
         if (name.equalsIgnoreCase("")) {
             return Validity.FUNGEON_NAME_IS_EMPTY;
@@ -876,12 +901,32 @@ public class Fungeon {
         return Validity.VALID;
     }
 
+    public Integer getMinPlayers() {
+        return minPlayers;
+    }
+
     public Integer getMaxPlayers() {
         return maxPlayers;
     }
 
     public ArrayList<Player> getJoinedPlayers() {
         return joinedPlayers;
+    }
+
+    public Location getAreaP1() {
+        return areaP1;
+    }
+
+    public Location getAreaP2() {
+        return areaP2;
+    }
+
+    public Location getWaitRoom() {
+        return waitRoom;
+    }
+
+    public Location getLobby() {
+        return lobby;
     }
 
     @Override

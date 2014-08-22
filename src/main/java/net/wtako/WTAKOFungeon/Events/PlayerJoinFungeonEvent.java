@@ -19,12 +19,17 @@ public class PlayerJoinFungeonEvent extends Event implements Cancellable {
         this.fungeon = fungeon;
     }
 
-    public Player getPlayer() {
-        return player;
-    }
-
     public Fungeon getFungeon() {
         return fungeon;
+    }
+
+    @Override
+    public HandlerList getHandlers() {
+        return PlayerJoinFungeonEvent.handlers;
+    }
+
+    public Player getPlayer() {
+        return player;
     }
 
     @Override
@@ -35,11 +40,6 @@ public class PlayerJoinFungeonEvent extends Event implements Cancellable {
     @Override
     public void setCancelled(boolean cancelled) {
         this.cancelled = cancelled;
-    }
-
-    @Override
-    public HandlerList getHandlers() {
-        return PlayerJoinFungeonEvent.handlers;
     }
 
 }

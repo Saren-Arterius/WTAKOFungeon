@@ -19,27 +19,6 @@ public class LocationUtils {
         delStmt.close();
     }
 
-    public static String toHumanReadable(Location location) {
-        return MessageFormat.format(Lang.LOCATION_FORMAT.toString(), location.getWorld().getName(), location.getX(),
-                location.getY(), location.getZ());
-    }
-
-    public static int saveLocation(Location location) throws SQLException {
-        if (location == null) {
-            return -1;
-        }
-        final PreparedStatement insStmt = Database.getConn().prepareStatement(
-                "INSERT INTO locations (`world`, `x`, `y`, `z`) VALUES (?, ?, ?, ?)");
-        insStmt.setString(1, location.getWorld().getName());
-        insStmt.setDouble(2, location.getX());
-        insStmt.setDouble(3, location.getY());
-        insStmt.setDouble(4, location.getZ());
-        insStmt.execute();
-        final int locID = insStmt.getGeneratedKeys().getInt(1);
-        insStmt.close();
-        return locID;
-    }
-
     public static Location getLocation(int locID) throws SQLException {
         final PreparedStatement selStmt = Database.getConn().prepareStatement(
                 "SELECT * FROM locations WHERE row_id = ?");
@@ -99,5 +78,26 @@ public class LocationUtils {
             return false;
         }
         return true;
+    }
+
+    public static int saveLocation(Location location) throws SQLException {
+        if (location == null) {
+            return -1;
+        }
+        final PreparedStatement insStmt = Database.getConn().prepareStatement(
+                "INSERT INTO locations (`world`, `x`, `y`, `z`) VALUES (?, ?, ?, ?)");
+        insStmt.setString(1, location.getWorld().getName());
+        insStmt.setDouble(2, location.getX());
+        insStmt.setDouble(3, location.getY());
+        insStmt.setDouble(4, location.getZ());
+        insStmt.execute();
+        final int locID = insStmt.getGeneratedKeys().getInt(1);
+        insStmt.close();
+        return locID;
+    }
+
+    public static String toHumanReadable(Location location) {
+        return MessageFormat.format(Lang.LOCATION_FORMAT.toString(), location.getWorld().getName(), location.getX(),
+                location.getY(), location.getZ());
     }
 }

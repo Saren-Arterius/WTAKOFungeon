@@ -18,26 +18,6 @@ import org.json.simple.JSONValue;
 
 public class ItemUtils {
 
-    public static Map<String, Object> serialize(ConfigurationSerializable cs) {
-        final Map<String, Object> serialized = ItemUtils.recreateMap(cs.serialize());
-        for (final Entry<String, Object> entry: serialized.entrySet()) {
-            if (entry.getValue() instanceof ConfigurationSerializable) {
-                entry.setValue(ItemUtils.serialize((ConfigurationSerializable) entry.getValue()));
-            }
-        }
-        serialized.put(ConfigurationSerialization.SERIALIZED_TYPE_KEY,
-                ConfigurationSerialization.getAlias(cs.getClass()));
-        return serialized;
-    }
-
-    public static Map<String, Object> recreateMap(Map<String, Object> original) {
-        final Map<String, Object> map = new HashMap<String, Object>();
-        for (final Entry<String, Object> entry: original.entrySet()) {
-            map.put(entry.getKey(), entry.getValue());
-        }
-        return map;
-    }
-
     @SuppressWarnings("unchecked")
     public static ConfigurationSerializable deserialize(Map<String, Object> map) {
         for (final Entry<String, Object> entry: map.entrySet()) {
@@ -55,16 +35,14 @@ public class ItemUtils {
     }
 
     @SuppressWarnings("unchecked")
-    public static JSONObject encodeMeta(ItemStack stack) {
-        if (stack == null) {
-            return null;
-        }
-        final JSONObject metaJson = new JSONObject();
-        metaJson.putAll(ItemUtils.serialize(stack.getItemMeta()));
-
-        final JSONObject itemJson = new JSONObject();
-        itemJson.put("item-meta", metaJson);
-        return itemJson;
+    public static JSONObject encodeInventory(PlayerInventory inv) {
+        final JSONObject invJson = new JSONObject();
+        invJson.put("content", ItemUtils.encodeItems(inv.getContents()).get("content"));
+        invJson.put("helmet", ItemUtils.encodeMeta(inv.getHelmet()));
+        invJson.put("chestplate", ItemUtils.encodeMeta(inv.getChestplate()));
+        invJson.put("leggings", ItemUtils.encodeMeta(inv.getLeggings()));
+        invJson.put("boots", ItemUtils.encodeMeta(inv.getBoots()));
+        return invJson;
     }
 
     @SuppressWarnings("unchecked")
@@ -84,17 +62,6 @@ public class ItemUtils {
     }
 
     @SuppressWarnings("unchecked")
-    public static JSONObject encodeItems(Iterable<ItemStack> items) {
-        final JSONObject contentJson = new JSONObject();
-        final ArrayList<JSONObject> content = new ArrayList<JSONObject>();
-        for (final ItemStack itemStack: items) {
-            content.add(ItemUtils.encodeMeta(itemStack));
-        }
-        contentJson.put("content", content);
-        return contentJson;
-    }
-
-    @SuppressWarnings("unchecked")
     public static JSONObject encodeItems(ItemStack[] items) {
         final JSONObject contentJson = new JSONObject();
         final ArrayList<JSONObject> content = new ArrayList<JSONObject>();
@@ -106,14 +73,35 @@ public class ItemUtils {
     }
 
     @SuppressWarnings("unchecked")
-    public static JSONObject encodeInventory(PlayerInventory inv) {
-        final JSONObject invJson = new JSONObject();
-        invJson.put("content", ItemUtils.encodeItems(inv.getContents()).get("content"));
-        invJson.put("helmet", ItemUtils.encodeMeta(inv.getHelmet()));
-        invJson.put("chestplate", ItemUtils.encodeMeta(inv.getChestplate()));
-        invJson.put("leggings", ItemUtils.encodeMeta(inv.getLeggings()));
-        invJson.put("boots", ItemUtils.encodeMeta(inv.getBoots()));
-        return invJson;
+    public static JSONObject encodeItems(Iterable<ItemStack> items) {
+        final JSONObject contentJson = new JSONObject();
+        final ArrayList<JSONObject> content = new ArrayList<JSONObject>();
+        for (final ItemStack itemStack: items) {
+            content.add(ItemUtils.encodeMeta(itemStack));
+        }
+        contentJson.put("content", content);
+        return contentJson;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static JSONObject encodeMeta(ItemStack stack) {
+        if (stack == null) {
+            return null;
+        }
+        final JSONObject metaJson = new JSONObject();
+        metaJson.putAll(ItemUtils.serialize(stack.getItemMeta()));
+
+        final JSONObject itemJson = new JSONObject();
+        itemJson.put("item-meta", metaJson);
+        return itemJson;
+    }
+
+    public static Map<String, Object> recreateMap(Map<String, Object> original) {
+        final Map<String, Object> map = new HashMap<String, Object>();
+        for (final Entry<String, Object> entry: original.entrySet()) {
+            map.put(entry.getKey(), entry.getValue());
+        }
+        return map;
     }
 
     @SuppressWarnings("unchecked")
@@ -124,20 +112,6 @@ public class ItemUtils {
         inv.setChestplate(ItemUtils.restoreItem((Map<String, Object>) itemJson.get("chestplate")));
         inv.setLeggings(ItemUtils.restoreItem((Map<String, Object>) itemJson.get("leggings")));
         inv.setBoots(ItemUtils.restoreItem((Map<String, Object>) itemJson.get("boots")));
-    }
-
-    @SuppressWarnings("unchecked")
-    public static ItemStack[] restoreItems(ArrayList<JSONObject> encodedContent) {
-        final ItemStack[] content = new ItemStack[encodedContent.size()];
-        for (int i = 0; i < content.length; i++) {
-            content[i] = ItemUtils.restoreItem(encodedContent.get(i));
-        }
-        return content;
-    }
-
-    @SuppressWarnings("unchecked")
-    public static ItemStack restoreItem(String string) {
-        return ItemUtils.restoreItem((Map<String, Object>) JSONValue.parse(string));
     }
 
     @SuppressWarnings("unchecked")
@@ -174,6 +148,20 @@ public class ItemUtils {
     }
 
     @SuppressWarnings("unchecked")
+    public static ItemStack restoreItem(String string) {
+        return ItemUtils.restoreItem((Map<String, Object>) JSONValue.parse(string));
+    }
+
+    @SuppressWarnings("unchecked")
+    public static ItemStack[] restoreItems(ArrayList<JSONObject> encodedContent) {
+        final ItemStack[] content = new ItemStack[encodedContent.size()];
+        for (int i = 0; i < content.length; i++) {
+            content[i] = ItemUtils.restoreItem(encodedContent.get(i));
+        }
+        return content;
+    }
+
+    @SuppressWarnings("unchecked")
     public static void restoreMeta(ItemStack stack, String string) {
         final Map<String, Object> itemJson = (Map<String, Object>) JSONValue.parse(string);
         final Map<String, Object> metaMap = (Map<String, Object>) itemJson.get("item-meta");
@@ -195,5 +183,17 @@ public class ItemUtils {
                 }
             }
         }
+    }
+
+    public static Map<String, Object> serialize(ConfigurationSerializable cs) {
+        final Map<String, Object> serialized = ItemUtils.recreateMap(cs.serialize());
+        for (final Entry<String, Object> entry: serialized.entrySet()) {
+            if (entry.getValue() instanceof ConfigurationSerializable) {
+                entry.setValue(ItemUtils.serialize((ConfigurationSerializable) entry.getValue()));
+            }
+        }
+        serialized.put(ConfigurationSerialization.SERIALIZED_TYPE_KEY,
+                ConfigurationSerialization.getAlias(cs.getClass()));
+        return serialized;
     }
 }

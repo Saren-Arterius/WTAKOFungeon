@@ -20,6 +20,17 @@ public class TimeLimitsWizard extends BaseWizard {
         sendMessage();
     }
 
+    public void sendMessage() {
+        if (fungeonTimeLimit == null) {
+            player.sendMessage("Fungeon time limit?");
+            return;
+        }
+        if (waitRoomTimeLimit == null) {
+            player.sendMessage("Wait room time limit?");
+            return;
+        }
+    }
+
     @Override
     public Validity setValue(Object value) throws SQLException {
         try {
@@ -52,17 +63,6 @@ public class TimeLimitsWizard extends BaseWizard {
             return Validity.PARSE_FAIL;
         }
 
-    }
-
-    public void sendMessage() {
-        if (fungeonTimeLimit == null) {
-            player.sendMessage("Fungeon time limit?");
-            return;
-        }
-        if (waitRoomTimeLimit == null) {
-            player.sendMessage("Wait room time limit?");
-            return;
-        }
     }
 
 }
