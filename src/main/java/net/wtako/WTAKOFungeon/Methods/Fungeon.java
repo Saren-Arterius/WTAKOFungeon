@@ -710,12 +710,15 @@ public class Fungeon {
     private static void awardPlayer(Player player, ArrayList<ItemStack> itemPrizes) {
         for (final ItemStack itemStack: itemPrizes) {
             ItemStackUtils.giveToPlayerOrDrop(itemStack, player, player.getLocation());
+            player.sendMessage(MessageFormat.format(Lang.YOU_ARE_AWARDED_ITEM.toString(),
+                    ItemStackUtils.toHumanReadable(itemStack)));
         }
     }
 
     private static void awardPlayer(Player player, int cashPrize) {
         if (Main.econ != null) {
             Main.econ.depositPlayer(player, cashPrize);
+            player.sendMessage(MessageFormat.format(Lang.YOU_ARE_AWARDED_MONEY.toString(), cashPrize));
         } else {
             player.sendMessage(MessageFormat.format(Lang.ERROR_HOOKING.toString(), "Vault"));
         }

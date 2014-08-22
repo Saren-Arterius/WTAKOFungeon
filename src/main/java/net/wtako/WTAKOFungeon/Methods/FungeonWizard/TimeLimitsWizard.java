@@ -36,11 +36,13 @@ public class TimeLimitsWizard extends BaseWizard {
             Validity result = fungeon.setFungeonTimeLimit(fungeonTimeLimit);
             if (result != Validity.VALID) {
                 fungeonTimeLimit = null;
+                waitRoomTimeLimit = null;
                 sendMessage();
                 return result;
             }
             result = fungeon.setWaitRoomTimeLimit(waitRoomTimeLimit);
             if (result != Validity.VALID) {
+                fungeonTimeLimit = null;
                 waitRoomTimeLimit = null;
                 sendMessage();
                 return result;

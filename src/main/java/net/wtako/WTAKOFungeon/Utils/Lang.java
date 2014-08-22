@@ -24,6 +24,8 @@ public enum Lang {
     ITEM_PRIZE_ADDED("&aSuccessfully added item prize &f({0}&f)&a for fungeon &f(&f{1}&f)&a as prize ID {2}."),
     NO_SUCH_A_ITEM_PRIZE("&eThere is no such a item prize where ID is {0}."),
     CANNOT_ADD_AIR("&cCannot add air as prize."),
+    YOU_ARE_AWARDED_ITEM("&aYou are awarded the following prize: {0}"),
+    YOU_ARE_AWARDED_MONEY("&aYou are awarded ${0}"),
 
     BAR_WAITING_ROOM_IDLE_FORMAT("Fungeon &f(&f{0}&f): Idle - {1}"),
     BAR_WAITING_ROOM_COUNTDOWN_FORMAT("Fungeon &f(&f{0}&f): Countdown - {1}"),

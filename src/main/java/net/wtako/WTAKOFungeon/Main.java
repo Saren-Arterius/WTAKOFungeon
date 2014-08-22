@@ -13,7 +13,6 @@ import net.wtako.WTAKOFungeon.EventHandlers.FungeonSignListener;
 import net.wtako.WTAKOFungeon.EventHandlers.FungeonWizardListener;
 import net.wtako.WTAKOFungeon.Methods.Database;
 import net.wtako.WTAKOFungeon.Methods.Fungeon;
-import net.wtako.WTAKOFungeon.Schedulers.FungeonScheduler;
 import net.wtako.WTAKOFungeon.Utils.Config;
 import net.wtako.WTAKOFungeon.Utils.Lang;
 
@@ -36,17 +35,13 @@ public final class Main extends JavaPlugin {
         Main.artifactId = getProperty("artifactId");
         Config.saveAll();
         loadLang();
+        setupEcon();
         getCommand(getProperty("mainCommand")).setExecutor(new CommandWFun());
-        if (Database.getInstance() == null) {
-            try {
-                new Database();
-                Fungeon.loadAllFungeons();
-            } catch (final SQLException e) {
-                e.printStackTrace();
-            }
-        }
-        if (FungeonScheduler.getInstance() == null) {
-            new FungeonScheduler();
+        try {
+            Fungeon.loadAllFungeons();
+        } catch (final SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
         getServer().getPluginManager().registerEvents(new FungeonWizardListener(), this);
         getServer().getPluginManager().registerEvents(new FungeonSignListener(), this);

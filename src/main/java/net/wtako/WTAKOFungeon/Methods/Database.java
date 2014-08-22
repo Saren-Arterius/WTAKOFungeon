@@ -12,16 +12,19 @@ import net.wtako.WTAKOFungeon.Utils.Lang;
 
 public class Database {
 
-    private static Database instance;
+    private static Database instance      = new Database();
     private static int      latestVersion = 1;
     public Connection       conn;
 
-    public Database() throws SQLException {
-        Database.instance = this;
-        final String path = MessageFormat.format("jdbc:sqlite:{0}/{1}", Main.getInstance().getDataFolder()
-                .getAbsolutePath(), Main.getInstance().getName() + ".db");
-        conn = DriverManager.getConnection(path);
-        check();
+    private Database() {
+        try {
+            final String path = MessageFormat.format("jdbc:sqlite:{0}/{1}", Main.getInstance().getDataFolder()
+                    .getAbsolutePath(), Main.getInstance().getName() + ".db");
+            conn = DriverManager.getConnection(path);
+            check();
+        } catch (final SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     private void addConfig(String config, String value) throws SQLException {
