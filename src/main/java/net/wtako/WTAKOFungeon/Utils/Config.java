@@ -46,16 +46,22 @@ public enum Config {
         return (boolean) value;
     }
 
-    public double getDouble() {
-        return (double) value;
-    }
-
     public int getInt() {
+        if (value instanceof Double) {
+            return ((Double) value).intValue();
+        }
         return (int) value;
     }
 
     public long getLong() {
         return Integer.valueOf(getInt()).longValue();
+    }
+
+    public double getDouble() {
+        if (value instanceof Integer) {
+            return ((Integer) value).doubleValue();
+        }
+        return (double) value;
     }
 
     public String getPath() {

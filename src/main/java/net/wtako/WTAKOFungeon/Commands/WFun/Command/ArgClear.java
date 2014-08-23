@@ -23,7 +23,8 @@ public class ArgClear {
         try {
             fungeonID = Integer.parseInt(args[2]);
         } catch (final NumberFormatException e) {
-            sender.sendMessage(MessageFormat.format(Lang.HELP_COMMAND_CLEAR.toString(), CommandHelper.joinArgsInUse(args, 2)));
+            sender.sendMessage(MessageFormat.format(Lang.HELP_COMMAND_CLEAR.toString(),
+                    CommandHelper.joinArgsInUse(args, 2)));
             return;
         }
         new BukkitRunnable() {

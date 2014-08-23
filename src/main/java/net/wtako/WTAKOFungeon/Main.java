@@ -2,7 +2,6 @@ package net.wtako.WTAKOFungeon;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -94,6 +93,7 @@ public final class Main extends JavaPlugin {
         return Main.LANG_FILE;
     }
 
+    @SuppressWarnings("deprecation")
     public String getProperty(String key) {
         final YamlConfiguration spawnConfig = YamlConfiguration.loadConfiguration(getResource("plugin.yml"));
         return spawnConfig.getString(key);
@@ -105,13 +105,10 @@ public final class Main extends JavaPlugin {
             try {
                 getDataFolder().mkdir();
                 lang.createNewFile();
-                final InputStream defConfigStream = getResource("messages.yml");
-                if (defConfigStream != null) {
-                    final YamlConfiguration defConfig = YamlConfiguration.loadConfiguration(defConfigStream);
-                    defConfig.save(lang);
-                    Lang.setFile(defConfig);
-                    return;
-                }
+                final YamlConfiguration defConfig = YamlConfiguration.loadConfiguration(lang);
+                defConfig.save(lang);
+                Lang.setFile(defConfig);
+                return;
             } catch (final IOException e) {
                 e.printStackTrace(); // So they notice
                 Main.log.severe("[" + Main.getInstance().getName() + "] Couldn't create language file.");
