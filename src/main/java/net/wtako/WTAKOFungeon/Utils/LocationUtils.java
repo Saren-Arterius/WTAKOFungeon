@@ -97,6 +97,9 @@ public class LocationUtils {
     }
 
     public static String toHumanReadable(Location location) {
+        if (location == null) {
+            return "null";
+        }
         return MessageFormat.format(Lang.LOCATION_FORMAT.toString(), location.getWorld().getName(), location.getX(),
                 location.getY(), location.getZ());
     }
