@@ -100,6 +100,9 @@ public class LocationUtils {
         if (location == null) {
             return "null";
         }
+        if (location.getWorld() == null) {
+            return "world is null";
+        }
         return MessageFormat.format(Lang.LOCATION_FORMAT.toString(), location.getWorld().getName(), location.getX(),
                 location.getY(), location.getZ());
     }

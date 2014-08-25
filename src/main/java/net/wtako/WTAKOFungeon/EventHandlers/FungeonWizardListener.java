@@ -139,10 +139,10 @@ public class FungeonWizardListener implements Listener {
                 FungeonWizardListener.inWizards.put(
                         event.getPlayer(),
                         (BaseWizard) targetConfig
-                                .getTargetClass()
-                                .getDeclaredConstructor(Player.class, Fungeon.class)
-                                .newInstance(event.getPlayer(),
-                                        FungeonWizardListener.inStartWizards.get(event.getPlayer())));
+                        .getTargetClass()
+                        .getDeclaredConstructor(Player.class, Fungeon.class)
+                        .newInstance(event.getPlayer(),
+                                FungeonWizardListener.inStartWizards.get(event.getPlayer())));
                 FungeonWizardListener.inStartWizards.remove(event.getPlayer());
             } catch (final IllegalArgumentException e) {
                 event.getPlayer().sendMessage(

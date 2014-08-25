@@ -345,7 +345,7 @@ public class Fungeon {
                             spawnLocation.getBlockX(), spawnLocation.getBlockY(), spawnLocation.getBlockZ());
                     Main.log.info(MessageFormat.format("Fungeon ({0}) - executing command: /{1}", toString(), command));
                     Main.getInstance().getServer()
-                            .dispatchCommand(Main.getInstance().getServer().getConsoleSender(), command);
+                    .dispatchCommand(Main.getInstance().getServer().getConsoleSender(), command);
                 }
                 currentWave++;
             }
