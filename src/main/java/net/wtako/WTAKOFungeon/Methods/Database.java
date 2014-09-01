@@ -78,6 +78,11 @@ public class Database {
         addConfig("database_version", String.valueOf(Database.latestVersion));
     }
 
+    public static void reset() throws SQLException {
+        Database.getConn().close();
+        Database.instance = null;
+    }
+
     public static Connection getConn() {
         return Database.instance.conn;
     }

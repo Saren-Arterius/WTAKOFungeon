@@ -8,6 +8,7 @@ website: ${url}
 main: ${groupId}.${artifactId}.${mainClass}
 mainCommand: ${mainCommand}
 depend: [Vault, BarAPI]
+sofedepend: [Multiverse-Core]
 
 commands:
     ${mainCommand}:

@@ -2,6 +2,7 @@ package net.wtako.WTAKOFungeon;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -10,6 +11,7 @@ import net.milkbowl.vault.economy.Economy;
 import net.wtako.WTAKOFungeon.Commands.CommandWFun;
 import net.wtako.WTAKOFungeon.EventHandlers.FungeonSignListener;
 import net.wtako.WTAKOFungeon.EventHandlers.FungeonWizardListener;
+import net.wtako.WTAKOFungeon.EventHandlers.PlayerGameListener;
 import net.wtako.WTAKOFungeon.EventHandlers.PlayerItemDropListener;
 import net.wtako.WTAKOFungeon.Methods.Database;
 import net.wtako.WTAKOFungeon.Methods.Fungeon;
@@ -52,16 +54,17 @@ public final class Main extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new FungeonWizardListener(), this);
         getServer().getPluginManager().registerEvents(new FungeonSignListener(), this);
         getServer().getPluginManager().registerEvents(new PlayerItemDropListener(), this);
+        getServer().getPluginManager().registerEvents(new PlayerGameListener(), this);
     }
 
     @Override
     public void onDisable() {
         try {
-            Database.getConn().close();
             for (final Fungeon fungeon: Fungeon.getAllFungeons().values()) {
                 fungeon.forceResetAll();
             }
             Fungeon.getAllFungeons().clear();
+            Database.reset();
         } catch (final SQLException e) {
             e.printStackTrace();
         }
@@ -93,21 +96,26 @@ public final class Main extends JavaPlugin {
         return Main.LANG_FILE;
     }
 
+    @SuppressWarnings("deprecation")
     public String getProperty(String key) {
         final YamlConfiguration spawnConfig = YamlConfiguration.loadConfiguration(getResource("plugin.yml"));
         return spawnConfig.getString(key);
     }
 
+    @SuppressWarnings("deprecation")
     public void loadLang() {
         final File lang = new File(getDataFolder(), "messages.yml");
         if (!lang.exists()) {
             try {
                 getDataFolder().mkdir();
                 lang.createNewFile();
-                final YamlConfiguration defConfig = YamlConfiguration.loadConfiguration(lang);
-                defConfig.save(lang);
-                Lang.setFile(defConfig);
-                return;
+                final InputStream defConfigStream = getResource("messages.yml");
+                if (defConfigStream != null) {
+                    final YamlConfiguration defConfig = YamlConfiguration.loadConfiguration(defConfigStream);
+                    defConfig.save(lang);
+                    Lang.setFile(defConfig);
+                    return;
+                }
             } catch (final IOException e) {
                 e.printStackTrace(); // So they notice
                 Main.log.severe("[" + Main.getInstance().getName() + "] Couldn't create language file.");

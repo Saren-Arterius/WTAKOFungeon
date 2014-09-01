@@ -20,7 +20,7 @@ public class ArgLeave {
         }
         final PlayerLeaveFungeonEvent event = new PlayerLeaveFungeonEvent(player, null, fungeon, LeaveCause.COMMAND);
         Main.getInstance().getServer().getPluginManager().callEvent(event);
-        fungeon.playerLeave(player);
+        fungeon.playerLeave(player, true);
     }
 
 }

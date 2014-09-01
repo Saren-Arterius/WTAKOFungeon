@@ -20,7 +20,7 @@ public class FungeonScheduler extends BukkitRunnable {
 
     @Override
     public void run() {
-        for (final Fungeon fungeon: Fungeon.getValidFungeons().values()) {
+        for (final Fungeon fungeon: Fungeon.getAllFungeons().values()) {
             fungeon.fungeonTick();
             fungeon.waitingRoomTick();
             fungeon.checkPlayerLocations();

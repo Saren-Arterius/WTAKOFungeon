@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>net.wtako</groupId>
 	<artifactId>WTAKOFungeon</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.1b-SNAPSHOT</version>
 	<name>WTAKOFungeon</name>
 	<description>WTAKO Fun dungeons</description>
 	<url>https://gitlab.wtako.net/Saren/wtakofungeon</url>
@@ -33,7 +33,7 @@
 		<dependency>
 			<groupId>org.bukkit</groupId>
 			<artifactId>bukkit</artifactId>
-			<version>1.7.5-R0.1-SNAPSHOT</version>
+			<version>1.7.10-R0.1-SNAPSHOT</version>
 			<type>jar</type>
 		</dependency>
 		<dependency>
