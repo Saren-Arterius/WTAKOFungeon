@@ -21,17 +21,12 @@ public class FungeonEndEvent extends Event {
         this.cashPrize = cashPrize;
     }
 
-    public int getCashPrize() {
+    public Integer getCashPrize() {
         return cashPrize;
     }
 
     public Fungeon getFungeon() {
         return fungeon;
-    }
-
-    @Override
-    public HandlerList getHandlers() {
-        return FungeonEndEvent.handlers;
     }
 
     public ArrayList<ItemStack> getPrizes() {
@@ -40,6 +35,15 @@ public class FungeonEndEvent extends Event {
 
     public void setCashPrize(int cashPrize) {
         this.cashPrize = cashPrize;
+    }
+
+    @Override
+    public HandlerList getHandlers() {
+        return FungeonEndEvent.handlers;
+    }
+
+    public static HandlerList getHandlerList() {
+        return FungeonEndEvent.handlers;
     }
 
 }

@@ -14,6 +14,10 @@ public enum Lang {
 
     TITLE("[" + Main.getInstance().getName() + "]"),
 
+    BC_FUNGEON_WIN("&a{0} players have completed fungeon &f(&f{1}&f)&a!"),
+    BC_FUNGEON_LOST("&c{0} players failed to complete fungeon &f(&f{1}&f)&c."),
+    BC_PLAYER_JOIN("&a{0} has joined fungeon &f(&f{1}&f)&a. &f({2}/{3}, &c-{4}&f)"),
+
     OBJECT_DELETED("&aSuccessfully deleted {0}! (If it exists)"),
 
     COMMAND_LIST_FUNGEON("Command invocations for fungeon &f(&f{0}&f):"),
@@ -57,6 +61,7 @@ public enum Lang {
     FUNGEON_IS_PLAYING("&eThere are players playing this fungeon. Please try again later."),
     FUNGEON_IS_PLAYING_KICK("&eThis fungeon has started, cannot kick this player."),
     PLAYER_KICKED("&aSuccessfully kicked <&f{0}&a> from fungeon &f(&f{1}&f)&e."),
+    CANNOT_KICK_SELF("&cYou cannot kick yourself."),
     FUNGEON_PLAYERS_NOT_ENOUGH("&cCannot start fungeon because there are not enough players."),
     FUNGEON_IS_NOT_READY("&eThis fungeon &f(&f{0}&f)&e is currently not ready."),
     ALREADY_JOINED_FUNGEON("&cYou have already joined a fungeon! &f(&f{0}&f)"),
@@ -111,6 +116,8 @@ public enum Lang {
     HELP_RELOAD("Type &b/" + Main.getInstance().getProperty("mainCommand") + " &a{0}&f to reload the plugin."),
     HELP_KICK("Type &b/" + Main.getInstance().getProperty("mainCommand")
             + " &a{0}&f &a<player name>&f to kick a player."),
+    HELP_JOIN("Type &b/" + Main.getInstance().getProperty("mainCommand")
+            + " &a{0}&f &a<fungeon ID>&f to join a fungeon."),
     HELP_LEAVE("Type &b/" + Main.getInstance().getProperty("mainCommand") + " &a{0}&f to leave the fungeon."),
 
     HELP_PRIZE("Type &b/" + Main.getInstance().getProperty("mainCommand") + " &a{0}&f to manage fungeon prizes."),

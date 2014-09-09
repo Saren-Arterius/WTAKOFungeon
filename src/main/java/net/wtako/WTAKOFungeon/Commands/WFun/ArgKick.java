@@ -21,11 +21,14 @@ public class ArgKick {
         }
         final Player kicker = (Player) sender;
         final Player kickee = Main.getInstance().getServer().getPlayer(args[1]);
+        if (kicker == kickee) {
+            kicker.sendMessage(Lang.CANNOT_KICK_SELF.toString());
+            return;
+        }
         if (kickee == null) {
             kicker.sendMessage(MessageFormat.format(Lang.PLAYER_NOT_FOUND.toString(), args[1]));
             return;
         }
-
         final Fungeon fungeon = Fungeon.getJoinedFungeon(kickee);
         if (fungeon == null) {
             kicker.sendMessage(MessageFormat.format(Lang.PLAYER_NOT_IN_FUNGEON.toString(), kickee.getName()));

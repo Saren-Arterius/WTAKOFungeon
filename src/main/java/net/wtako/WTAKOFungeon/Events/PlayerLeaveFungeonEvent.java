@@ -30,17 +30,21 @@ public class PlayerLeaveFungeonEvent extends Event {
         return fungeon;
     }
 
-    @Override
-    public HandlerList getHandlers() {
-        return PlayerLeaveFungeonEvent.handlers;
-    }
-
     public Player getKicker() {
         return kicker;
     }
 
     public Player getPlayer() {
         return player;
+    }
+
+    @Override
+    public HandlerList getHandlers() {
+        return PlayerLeaveFungeonEvent.handlers;
+    }
+
+    public static HandlerList getHandlerList() {
+        return PlayerLeaveFungeonEvent.handlers;
     }
 
 }

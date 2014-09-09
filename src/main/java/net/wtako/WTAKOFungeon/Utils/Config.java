@@ -16,6 +16,7 @@ public enum Config {
     DEFAULT_WAITING_ROOM_TIME("fungeon.default.waiting-room-time", 30),
     NO_ENEMIES_WAVE_INTERVAL("fungeon.no-enemies-wave-interval", 5),
     OUT_OF_AREA_KICK_TIMEOUT("fungeon.out-of-area-kick-timeout", 10),
+    BROADCAST_MESSAGES("fungeon.broadcast-messages", true),
     PLUGIN_ENABLED("system.plugin-enabled", true);
 
     public static void saveAll() {

@@ -19,6 +19,6 @@ public class ItemStackUtils {
     public static String toHumanReadable(ItemStack stack) {
         return MessageFormat.format(Lang.ITEM_PRINT_FORMAT.toString(), stack.getAmount(), stack.hasItemMeta()
                 && !stack.getItemMeta().getDisplayName().equalsIgnoreCase("") ? stack.getItemMeta().getDisplayName()
-                        : stack.getType().name());
+                : stack.getType().name());
     }
 }

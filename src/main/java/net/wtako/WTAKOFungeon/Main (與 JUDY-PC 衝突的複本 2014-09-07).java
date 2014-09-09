@@ -9,10 +9,8 @@ import java.util.logging.Logger;
 
 import net.milkbowl.vault.economy.Economy;
 import net.wtako.WTAKOFungeon.Commands.CommandWFun;
-import net.wtako.WTAKOFungeon.EventHandlers.BroadcastListener;
 import net.wtako.WTAKOFungeon.EventHandlers.FungeonSignListener;
 import net.wtako.WTAKOFungeon.EventHandlers.FungeonWizardListener;
-import net.wtako.WTAKOFungeon.EventHandlers.PlayerGameListener;
 import net.wtako.WTAKOFungeon.EventHandlers.PlayerItemDropListener;
 import net.wtako.WTAKOFungeon.Methods.Database;
 import net.wtako.WTAKOFungeon.Methods.Fungeon;
@@ -49,24 +47,22 @@ public final class Main extends JavaPlugin {
                 e.printStackTrace();
             }
         }
-        new FungeonScheduler();
+        if (FungeonScheduler.getInstance() == null) {
+            new FungeonScheduler();
+        }
         getServer().getPluginManager().registerEvents(new FungeonWizardListener(), this);
         getServer().getPluginManager().registerEvents(new FungeonSignListener(), this);
         getServer().getPluginManager().registerEvents(new PlayerItemDropListener(), this);
-        getServer().getPluginManager().registerEvents(new PlayerGameListener(), this);
-        if (Config.BROADCAST_MESSAGES.getBoolean()) {
-            getServer().getPluginManager().registerEvents(new BroadcastListener(), this);
-        }
     }
 
     @Override
     public void onDisable() {
         try {
+            Database.getConn().close();
             for (final Fungeon fungeon: Fungeon.getAllFungeons().values()) {
                 fungeon.forceResetAll();
             }
             Fungeon.getAllFungeons().clear();
-            Database.reset();
         } catch (final SQLException e) {
             e.printStackTrace();
         }
@@ -98,13 +94,11 @@ public final class Main extends JavaPlugin {
         return Main.LANG_FILE;
     }
 
-    @SuppressWarnings("deprecation")
     public String getProperty(String key) {
         final YamlConfiguration spawnConfig = YamlConfiguration.loadConfiguration(getResource("plugin.yml"));
         return spawnConfig.getString(key);
     }
 
-    @SuppressWarnings("deprecation")
     public void loadLang() {
         final File lang = new File(getDataFolder(), "messages.yml");
         if (!lang.exists()) {
@@ -123,7 +117,7 @@ public final class Main extends JavaPlugin {
                 Main.log.severe("[" + Main.getInstance().getName() + "] Couldn't create language file.");
                 Main.log.severe("[" + Main.getInstance().getName() + "] This is a fatal error. Now disabling");
                 setEnabled(false); // Without it loaded, we can't send them
-                // messages
+                                   // messages
             }
         }
         final YamlConfiguration conf = YamlConfiguration.loadConfiguration(lang);

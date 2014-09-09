@@ -36,11 +36,6 @@ public class FungeonStartEvent extends Event implements Cancellable {
     }
 
     @Override
-    public HandlerList getHandlers() {
-        return FungeonStartEvent.handlers;
-    }
-
-    @Override
     public boolean isCancelled() {
         return cancelled;
     }
@@ -52,6 +47,15 @@ public class FungeonStartEvent extends Event implements Cancellable {
 
     public void setCashCost(Integer cashCost) {
         this.cashCost = cashCost;
+    }
+
+    @Override
+    public HandlerList getHandlers() {
+        return FungeonStartEvent.handlers;
+    }
+
+    public static HandlerList getHandlerList() {
+        return FungeonStartEvent.handlers;
     }
 
 }
